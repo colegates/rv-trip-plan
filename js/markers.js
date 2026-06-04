@@ -26,11 +26,12 @@ let _currentDayFilter = null;   // null = all days
 
 /* ── Marker element factory ──────────────────────────────────────────────── */
 function makeMarkerEl(place) {
-  /* MapLibre sets transform on the element passed as `element:`, so we use a
-     wrapper for positioning and scale the inner visual element on hover. */
+  /* MapLibre adds class .maplibregl-marker { position:absolute; top:0; left:0 }
+     to whatever element we pass in.  Don't set position inline — it would
+     override that CSS and break transform-based positioning entirely. */
   const wrapper = document.createElement('div');
   wrapper.className = 'map-marker';
-  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer;position:relative';
+  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer';
 
   const inner = document.createElement('div');
   inner.style.cssText = [
@@ -174,7 +175,8 @@ export function showBottomSheet(place, dayMap) {
   gpsResult.classList.remove('visible');
 
   sheet.classList.add('open');
-  flyToPlace(place.lat, place.lng);
+  /* Pan gently to the marker if it's near the edge, but don't force zoom */
+  flyToPlace(place.lat, place.lng, getMap()?.getZoom() ?? 10);
 }
 
 function renderBsActions(place) {
