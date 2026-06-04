@@ -311,8 +311,14 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   display: none;
 }
 #day-legend.visible { display: block; }
-.legend-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-.legend-swatch { width: 24px; height: 4px; border-radius: 2px; }
+.legend-row { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 5px; }
+.legend-swatch { width: 24px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+.legend-toggle { cursor: pointer; user-select: none; transition: opacity .2s, background .15s; }
+.legend-toggle:hover { background: rgba(0,0,0,.06); }
+.legend-label { flex: 1; }
+.legend-eye { font-size: .75rem; opacity: .6; flex-shrink: 0; }
+.legend-off { opacity: .35; }
+.legend-off .legend-swatch { opacity: .25; }
 
 /* ─── Itinerary panel ───────────────────────────────────────────────────── */
 #panel-itinerary {
