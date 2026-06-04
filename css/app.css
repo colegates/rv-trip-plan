@@ -53,8 +53,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 #app {
   display: flex;
   flex-direction: column;
+  height: 100vh;
   height: 100dvh;
-  height: calc(100vh + var(--safe-top));
   max-width: 600px;
   margin: 0 auto;
   position: relative;
