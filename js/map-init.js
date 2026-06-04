@@ -82,13 +82,19 @@ export const DAY_ROUTES = {
   ],
 };
 
-/* Vector fill/road layer IDs to hide when satellite is active */
+/* Vector layers to hide when satellite is active (replaced by Esri overlays) */
 const SAT_HIDE_LAYERS = [
   'background', 'earth', 'water', 'natural',
   'landuse-park', 'landuse-urban',
   'roads-minor', 'roads-secondary', 'roads-major-case', 'roads-major',
   'roads-hw-case', 'roads-highway', 'waterway',
+  /* Also hide PMTiles text labels — Esri overlay provides labels in sat mode */
+  'label-roads-major', 'label-places-small', 'label-places-town',
+  'label-places-city', 'label-states',
 ];
+
+/* Esri reference overlay layers shown only in satellite mode */
+const SAT_SHOW_LAYERS = ['esri-places-layer', 'esri-roads-layer'];
 
 let _satelliteMode = false;
 
@@ -101,6 +107,10 @@ export function toggleSatellite() {
     _map.setLayoutProperty('satellite-tiles', 'visibility', satVis);
   for (const id of SAT_HIDE_LAYERS) {
     if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', vecVis);
+  }
+  /* Esri label overlays only appear in satellite mode */
+  for (const id of SAT_SHOW_LAYERS) {
+    if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', satVis);
   }
   return _satelliteMode;
 }
@@ -124,6 +134,21 @@ function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
         tileSize: 256,
         maxzoom: 19,
         attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>, Maxar, Earthstar Geographics',
+      },
+      /* Transparent label overlays for satellite mode (also cached by SW) */
+      'esri-places': {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>',
+      },
+      'esri-roads': {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>',
       }
     },
     layers: [
@@ -200,7 +225,17 @@ function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
         filter: ['==', ['geometry-type'], 'LineString'],
         paint: { 'line-color': '#9fc4d0', 'line-width': 1 } },
 
-      /* ── Text labels ──────────────────────────────────────────────────── */
+      /* ── Esri reference overlays (satellite mode only) ────────────────── */
+      /* Place / admin names — transparent raster overlay */
+      { id: 'esri-places-layer', type: 'raster', source: 'esri-places',
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 1 } },
+      /* Road names — transparent raster overlay */
+      { id: 'esri-roads-layer', type: 'raster', source: 'esri-roads',
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 1 } },
+
+      /* ── Text labels (non-satellite mode, from PMTiles vector source) ── */
 
       /* Road names (along line, high zoom only) */
       { id: 'label-roads-major', type: 'symbol', source: 'basemap', 'source-layer': 'roads',
@@ -321,7 +356,7 @@ export async function initMap(containerId) {
     dragRotate: false,
   });
 
-  _map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+  _map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
 
   return new Promise((resolve, reject) => {
     _map.on('load', () => { addRouteLayers(); resolve(_map); });
