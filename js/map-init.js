@@ -321,7 +321,7 @@ export async function initMap(containerId) {
     dragRotate: false,
   });
 
-  _map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+  _map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
 
   return new Promise((resolve, reject) => {
     _map.on('load', () => { addRouteLayers(); resolve(_map); });
