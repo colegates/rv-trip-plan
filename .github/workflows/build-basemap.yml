@@ -24,9 +24,14 @@ jobs:
 
       - name: Install pmtiles CLI
         run: |
-          # Install via Go (fast, single binary)
-          go install github.com/protomaps/go-pmtiles/cmd/pmtiles@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
+          # Download the pre-built binary from GitHub Releases (more reliable than go install)
+          VERSION=$(curl -s https://api.github.com/repos/protomaps/go-pmtiles/releases/latest \
+            | grep '"tag_name"' | head -1 | cut -d'"' -f4 | sed 's/^v//')
+          echo "Installing pmtiles v${VERSION}"
+          curl -sL "https://github.com/protomaps/go-pmtiles/releases/download/v${VERSION}/go-pmtiles_${VERSION}_Linux_x86_64.tar.gz" \
+            | tar xz pmtiles
+          sudo mv pmtiles /usr/local/bin/
+          pmtiles --version
 
       - name: Find latest Protomaps build
         id: find-build
