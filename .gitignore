@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local dev server logs
+*.log
+
+# Node (only for running the icon generator locally)
+node_modules/
+
+# Basemap note: basemap.pmtiles IS intentionally committed (it's the offline map).
+# It must be <100 MB (GitHub Pages hard limit). Git LFS is NOT used because
+# GitHub Pages does not serve LFS files.
+# If the file exceeds ~80 MB, split the bbox or reduce maxzoom.
