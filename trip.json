@@ -1,0 +1,517 @@
+{
+  "schema": "rvtrip.v1",
+  "mode": "replace",
+  "label": "Denver ↔ Yellowstone RV Trip, July 2026",
+  "trip": {
+    "title": "Denver ↔ Yellowstone RV Trip",
+    "startDate": "2026-07-09",
+    "endDate": "2026-07-15",
+    "vehicle": "Road Bear Class C 29–31’",
+    "booking": "CXF847765-1",
+    "notes": "1,400 included miles (~$0.45/mi over). Return RV full; drop by 10:30 am Wed 15 Jul. Fly 14:05."
+  },
+  "days": [
+    {
+      "id": "day1",
+      "date": "2026-07-09",
+      "title": "Denver → Casper",
+      "fromTo": "Denver, CO → Casper, WY",
+      "driveTime": "4h30",
+      "distanceMiles": 265,
+      "summary": "Pick up RV from Road Bear depot, big grocery shop at Walmart, then drive north on I-25 through Cheyenne and Douglas to Casper. Check in Casper KOA.",
+      "order": 1
+    },
+    {
+      "id": "day2",
+      "date": "2026-07-10",
+      "title": "Casper → Fishing Bridge",
+      "fromTo": "Casper, WY → Yellowstone NP (Fishing Bridge)",
+      "driveTime": "5h50",
+      "distanceMiles": 293,
+      "summary": "Stop at Lou Taubert Ranch Outfitters in Casper (opens 10 am, closed Mon). Drive US-20/26 west through Shoshoni and stop at Thermopolis Hot Springs State Park. Continue northwest through Worland, Greybull, and Cody before entering Yellowstone via the East Entrance to Fishing Bridge RV Park.",
+      "order": 2
+    },
+    {
+      "id": "day3",
+      "date": "2026-07-11",
+      "title": "Yellowstone: Canyon & Hayden Valley",
+      "fromTo": "Fishing Bridge → Canyon Village → Fishing Bridge",
+      "driveTime": "",
+      "distanceMiles": 80,
+      "summary": "Day loop north from Fishing Bridge: Mud Volcano, Hayden Valley (bison!), Canyon Village, Artist Point overlook of the Grand Canyon of the Yellowstone. Return to Fishing Bridge.",
+      "order": 3
+    },
+    {
+      "id": "day4",
+      "date": "2026-07-12",
+      "title": "Fishing Bridge → Madison (via geysers)",
+      "fromTo": "Fishing Bridge → West Thumb → Old Faithful → Madison",
+      "driveTime": "",
+      "distanceMiles": 64,
+      "summary": "Drive the Grand Loop south to West Thumb Geyser Basin on Yellowstone Lake, then west along the Continental Divide to Old Faithful and the Grand Prismatic Spring (Midway Geyser Basin). End at Madison Campground (dry camping).",
+      "order": 4
+    },
+    {
+      "id": "day5",
+      "date": "2026-07-13",
+      "title": "Madison → Cody",
+      "fromTo": "Madison → Norris → Canyon → Cody, WY",
+      "driveTime": "3h25",
+      "distanceMiles": 121,
+      "summary": "Morning: Gibbon Falls, Norris Geyser Basin. Drive east through Canyon to Fishing Bridge, then out the East Entrance to Cody. Afternoon: Buffalo Bill Center of the West. Evening: Cody Nite Rodeo, gates 7 pm, rodeo 8 pm.",
+      "order": 5
+    },
+    {
+      "id": "day6",
+      "date": "2026-07-14",
+      "title": "Cody → Fort Collins",
+      "fromTo": "Cody, WY → Fort Collins, CO",
+      "driveTime": "7h40",
+      "distanceMiles": 444,
+      "summary": "Long drive south: retrace via Greybull, Worland, Thermopolis, Shoshoni, Casper, Douglas, Wheatland, Cheyenne, then south on I-25 to Fort Collins/Lakeside KOA. Fuel up in Cody before leaving — last good-value stop before the park on the return.",
+      "order": 6
+    },
+    {
+      "id": "day7",
+      "date": "2026-07-15",
+      "title": "Fort Collins → Denver Airport",
+      "fromTo": "Fort Collins, CO → Denver International Airport",
+      "driveTime": "1h00",
+      "distanceMiles": 50,
+      "summary": "Easy morning drive south on I-25. Drop RV at Road Bear depot by 10:30 am. Fly Denver → home at 14:05.",
+      "order": 7
+    }
+  ],
+  "places": [
+    {
+      "id": "casper-koa",
+      "kind": "campground",
+      "name": "Casper KOA Journey",
+      "lat": 42.9137,
+      "lng": -106.3415,
+      "address": "1101 Prairie Ln, Bar Nunn, WY 82601",
+      "phone": "+13075771664",
+      "notes": "Night 1. Full hookups, pool, laundry.",
+      "dayIds": ["day1"]
+    },
+    {
+      "id": "fishing-bridge",
+      "kind": "campground",
+      "name": "Fishing Bridge RV Park",
+      "lat": 44.5648,
+      "lng": -110.3695,
+      "address": "Yellowstone NP, WY 82190",
+      "phone": "+13073447311",
+      "notes": "Nights 2 & 3. Full hookups (only hard-sided RVs — bear country). Reservation required.",
+      "dayIds": ["day2", "day3"]
+    },
+    {
+      "id": "madison",
+      "kind": "campground",
+      "name": "Madison Campground",
+      "lat": 44.6433,
+      "lng": -110.8636,
+      "address": "Madison Campground, Yellowstone NP",
+      "phone": "+13073447311",
+      "notes": "Night 4. Dry camping (no hookups). Flush toilets. Bear boxes required.",
+      "dayIds": ["day4"]
+    },
+    {
+      "id": "parkway-rv",
+      "kind": "campground",
+      "name": "Parkway RV Campground",
+      "lat": 44.5148,
+      "lng": -109.0942,
+      "address": "132 Yellowstone Ave, Cody, WY 82414",
+      "phone": "+13075275927",
+      "notes": "Night 5. Walking distance to Buffalo Bill Center and downtown Cody.",
+      "dayIds": ["day5"]
+    },
+    {
+      "id": "fort-collins-koa",
+      "kind": "campground",
+      "name": "Fort Collins / Lakeside KOA",
+      "lat": 40.6148,
+      "lng": -105.1089,
+      "address": "1910 Lakeside Resort Ln, Fort Collins, CO 80524",
+      "phone": "+19704849880",
+      "notes": "Night 6. Full hookups. Easy I-25 access for final morning.",
+      "dayIds": ["day6"]
+    },
+    {
+      "id": "roadbear-depot",
+      "kind": "stop",
+      "name": "Road Bear RV Depot",
+      "lat": 39.8324,
+      "lng": -104.9446,
+      "address": "6586 Brighton Blvd, Commerce City, CO 80022",
+      "phone": "+17205701100",
+      "notes": "Pickup Day 1 (morning). Return by 10:30 am Day 7. Booking CXF847765-1.",
+      "dayIds": ["day1", "day7"]
+    },
+    {
+      "id": "walmart-cc",
+      "kind": "stop",
+      "name": "Walmart Supercenter (big shop)",
+      "lat": 39.8047,
+      "lng": -104.9281,
+      "address": "5990 Dahlia St, Commerce City, CO",
+      "phone": "",
+      "notes": "Major grocery and supply run before hitting the road. Stock up for 7 days.",
+      "dayIds": ["day1"]
+    },
+    {
+      "id": "lou-taubert",
+      "kind": "stop",
+      "name": "Lou Taubert Ranch Outfitters",
+      "lat": 42.8485,
+      "lng": -106.3244,
+      "address": "125 E 2nd St, Casper, WY",
+      "phone": "+18004479378",
+      "notes": "Opens 10 am. Closed Mondays. Iconic Western wear store — boots, hats, gear.",
+      "dayIds": ["day2"]
+    },
+    {
+      "id": "thermopolis-hs",
+      "kind": "stop",
+      "name": "Hot Springs State Park",
+      "lat": 43.6511,
+      "lng": -108.2058,
+      "address": "538 N Park St, Thermopolis, WY",
+      "phone": "",
+      "notes": "World’s largest mineral hot spring. Free state bathhouse available. Great leg-stretch on long Day 2 drive.",
+      "dayIds": ["day2", "day6"]
+    },
+    {
+      "id": "buffalo-bill-center",
+      "kind": "stop",
+      "name": "Buffalo Bill Center of the West",
+      "lat": 44.525,
+      "lng": -109.0732,
+      "address": "720 Sheridan Ave, Cody, WY",
+      "phone": "+13075874771",
+      "notes": "World-class Western museum (5 museums in one). Allow 2–3 hours. Open daily.",
+      "dayIds": ["day5"]
+    },
+    {
+      "id": "cody-nite-rodeo",
+      "kind": "stop",
+      "name": "Cody Nite Rodeo (Stampede Park)",
+      "lat": 44.5213,
+      "lng": -109.0853,
+      "address": "519 W Yellowstone Ave, Cody, WY",
+      "phone": "",
+      "notes": "Gates open 7 pm, rodeo starts 8 pm every night June–Aug. Get there early for good seats.",
+      "dayIds": ["day5"]
+    },
+    {
+      "id": "hayden-valley",
+      "kind": "stop",
+      "name": "Hayden Valley",
+      "lat": 44.6597,
+      "lng": -110.4686,
+      "address": "Hayden Valley, Yellowstone NP",
+      "phone": "",
+      "notes": "Best area in the park for bison herds, grizzly bears, and wolves. Drive slowly and watch the meadows flanking the Yellowstone River.",
+      "dayIds": ["day3"]
+    },
+    {
+      "id": "artist-point",
+      "kind": "stop",
+      "name": "Artist Point",
+      "lat": 44.721,
+      "lng": -110.4794,
+      "address": "Artist Point, Yellowstone NP",
+      "phone": "",
+      "notes": "Classic overlook of the Grand Canyon of the Yellowstone and Lower Falls. Short walk from parking. Don’t miss it.",
+      "dayIds": ["day3"]
+    },
+    {
+      "id": "canyon-village",
+      "kind": "stop",
+      "name": "Canyon Village",
+      "lat": 44.7355,
+      "lng": -110.4925,
+      "address": "Canyon Village, Yellowstone NP",
+      "phone": "",
+      "notes": "Visitor center, gift shop, gas. Start of the North and South Rim drives to the canyon.",
+      "dayIds": ["day3"]
+    },
+    {
+      "id": "mud-volcano",
+      "kind": "stop",
+      "name": "Mud Volcano",
+      "lat": 44.6249,
+      "lng": -110.4337,
+      "address": "Mud Volcano Area, Yellowstone NP",
+      "phone": "",
+      "notes": "Bubbling mud pots and fumaroles. Short boardwalk loop. Sulphurous smell is part of the experience!",
+      "dayIds": ["day3"]
+    },
+    {
+      "id": "west-thumb",
+      "kind": "stop",
+      "name": "West Thumb Geyser Basin",
+      "lat": 44.4163,
+      "lng": -110.5729,
+      "address": "West Thumb, Yellowstone NP",
+      "phone": "",
+      "notes": "Unique geothermal features right on the shore of Yellowstone Lake. Boardwalk loop ~1 mile.",
+      "dayIds": ["day4"]
+    },
+    {
+      "id": "old-faithful",
+      "kind": "stop",
+      "name": "Old Faithful",
+      "lat": 44.4605,
+      "lng": -110.8281,
+      "address": "Old Faithful, Yellowstone NP",
+      "phone": "",
+      "notes": "Erupts every 60–110 min (avg ~90 min). Check predicted eruption times at the visitor center. Upper Geyser Basin walk is excellent.",
+      "dayIds": ["day4"]
+    },
+    {
+      "id": "grand-prismatic",
+      "kind": "stop",
+      "name": "Grand Prismatic Spring",
+      "lat": 44.5251,
+      "lng": -110.8382,
+      "address": "Midway Geyser Basin, Yellowstone NP",
+      "phone": "",
+      "notes": "Largest hot spring in the US. Rainbow colors best seen from the overlook trail (1 mile RT). Boardwalk gets crowded by 9 am — go early.",
+      "dayIds": ["day4"]
+    },
+    {
+      "id": "norris",
+      "kind": "stop",
+      "name": "Norris Geyser Basin",
+      "lat": 44.7263,
+      "lng": -110.7036,
+      "address": "Norris, Yellowstone NP",
+      "phone": "",
+      "notes": "Hottest, oldest, and most dynamic geyser basin in the park. Two loop trails (Porcelain Basin ½ mi, Back Basin 1.5 mi).",
+      "dayIds": ["day5"]
+    },
+    {
+      "id": "den-airport",
+      "kind": "stop",
+      "name": "Denver International Airport (DEN)",
+      "lat": 39.8561,
+      "lng": -104.6737,
+      "address": "8500 Peña Blvd, Denver, CO 80249",
+      "phone": "",
+      "notes": "Flight departs 14:05. Allow 1.5 h at minimum after returning the RV (10:30 drop).",
+      "dayIds": ["day7"]
+    },
+    {
+      "id": "horsetooth",
+      "kind": "poi",
+      "name": "Horsetooth Reservoir",
+      "category": "Outdoors",
+      "lat": 40.5483,
+      "lng": -105.1411,
+      "notes": "Great reservoir west of Fort Collins with hiking, kayaking, and swimming. Worth a morning stop on Day 7 if time allows."
+    },
+    {
+      "id": "new-belgium",
+      "kind": "poi",
+      "name": "New Belgium Brewing",
+      "category": "Food/Brewery",
+      "lat": 40.5897,
+      "lng": -105.0758,
+      "address": "500 Linden St, Fort Collins, CO",
+      "notes": "Colorado’s largest craft brewery. Tours available; excellent taproom. Day 6 evening wind-down option in Fort Collins."
+    },
+    {
+      "id": "wy-capitol",
+      "kind": "poi",
+      "name": "Wyoming State Capitol",
+      "category": "History",
+      "lat": 41.1403,
+      "lng": -104.8202,
+      "address": "200 W 24th St, Cheyenne, WY",
+      "notes": "Stunning Romanesque Revival capitol on I-25 corridor. 10-min stop if passing through Cheyenne."
+    },
+    {
+      "id": "cfd-museum",
+      "kind": "poi",
+      "name": "Cheyenne Frontier Days Old West Museum",
+      "category": "History",
+      "lat": 41.1637,
+      "lng": -104.8369,
+      "address": "4610 N Carey Ave, Cheyenne, WY",
+      "notes": "Celebrates the world’s largest outdoor rodeo. Great carriage collection. Quick stop on I-25 route."
+    },
+    {
+      "id": "terry-bison",
+      "kind": "poi",
+      "name": "Terry Bison Ranch",
+      "category": "Wildlife",
+      "lat": 41.041,
+      "lng": -104.829,
+      "address": "51 I-25 Service Rd E, Cheyenne, WY",
+      "notes": "Bison ranch right on I-25 south of Cheyenne. Train ride to see bison up close. Good Day 6 stop heading south."
+    },
+    {
+      "id": "glendo",
+      "kind": "poi",
+      "name": "Glendo State Park",
+      "category": "Outdoors",
+      "lat": 42.5085,
+      "lng": -105.0207,
+      "notes": "Reservoir on the North Platte River. Good leg-stretch stop on Day 1 or Day 6 along I-25."
+    },
+    {
+      "id": "ayres-bridge",
+      "kind": "poi",
+      "name": "Ayers Natural Bridge",
+      "category": "Sights",
+      "lat": 42.7283,
+      "lng": -105.5847,
+      "notes": "Free county park; 30-ft natural stone arch over LaPrele Creek. 12-mile detour off I-25. Picnic area."
+    },
+    {
+      "id": "trails-center",
+      "kind": "poi",
+      "name": "National Historic Trails Interpretive Center",
+      "category": "History",
+      "lat": 42.8666,
+      "lng": -106.3416,
+      "address": "1501 N Poplar St, Casper, WY",
+      "notes": "Excellent BLM-run museum covering Oregon, California, Mormon, and Pony Express trails through Casper. Worth 1–2 hours."
+    },
+    {
+      "id": "fort-caspar",
+      "kind": "poi",
+      "name": "Fort Caspar Museum",
+      "category": "History",
+      "lat": 42.833,
+      "lng": -106.3539,
+      "address": "4001 Fort Caspar Rd, Casper, WY",
+      "notes": "Reconstructed 1865 military fort with living-history exhibits. Near the Platte River Bridge."
+    },
+    {
+      "id": "wind-river-canyon",
+      "kind": "poi",
+      "name": "Wind River Canyon Scenic Byway",
+      "category": "Sights",
+      "lat": 43.55,
+      "lng": -108.18,
+      "notes": "US-20 carves through this spectacular canyon — sheer 2,500-ft walls. You drive through it on Day 2 and Day 6. No detour needed."
+    },
+    {
+      "id": "boysen",
+      "kind": "poi",
+      "name": "Boysen State Park",
+      "category": "Outdoors",
+      "lat": 43.4153,
+      "lng": -108.1779,
+      "notes": "Reservoir at the mouth of Wind River Canyon. Fishing, boating. Quick stop on US-20 route."
+    },
+    {
+      "id": "wyo-dino",
+      "kind": "poi",
+      "name": "Wyoming Dinosaur Center",
+      "category": "Sights",
+      "lat": 43.6446,
+      "lng": -108.2107,
+      "address": "110 Carter Ranch Rd, Thermopolis, WY",
+      "notes": "One of the top dino museums in the US, with actual dig site tours available. In Thermopolis — easy add-on to the hot springs stop."
+    },
+    {
+      "id": "legend-rock",
+      "kind": "poi",
+      "name": "Legend Rock Petroglyph Site",
+      "category": "History",
+      "lat": 43.79,
+      "lng": -108.55,
+      "notes": "Over 300 petroglyphs spanning thousands of years. Off paved road; check road conditions. Day 2 detour."
+    },
+    {
+      "id": "bb-dam",
+      "kind": "poi",
+      "name": "Buffalo Bill Dam & Visitor Center",
+      "category": "Sights",
+      "lat": 44.5063,
+      "lng": -109.1856,
+      "address": "4808 North Fork Hwy, Cody, WY",
+      "notes": "Historic arch dam in a spectacular gorge 6 miles west of Cody. Free to visit. Great photo stop entering or leaving Yellowstone."
+    },
+    {
+      "id": "old-trail-town",
+      "kind": "poi",
+      "name": "Old Trail Town",
+      "category": "History",
+      "lat": 44.5246,
+      "lng": -109.0989,
+      "address": "1831 DeMaris Dr, Cody, WY",
+      "notes": "Collection of original 1800s frontier buildings relocated to one site. Cemetery of mountain men and outlaws. Admission ~$8."
+    },
+    {
+      "id": "heart-mountain",
+      "kind": "poi",
+      "name": "Heart Mountain WWII Interpretive Center",
+      "category": "History",
+      "lat": 44.6741,
+      "lng": -108.943,
+      "address": "1539 Road 19, Powell, WY",
+      "notes": "Moving museum on the Japanese American internment camp here 1942–45. Between Cody and the park. Allow 1–2 hours."
+    },
+    {
+      "id": "lamar-valley",
+      "kind": "poi",
+      "name": "Lamar Valley",
+      "category": "Wildlife",
+      "lat": 44.8983,
+      "lng": -110.238,
+      "notes": "The “American Serengeti” — best wildlife viewing in the lower 48. Bison, wolves, bears, pronghorn. Dawn and dusk are prime time."
+    },
+    {
+      "id": "mammoth",
+      "kind": "poi",
+      "name": "Mammoth Hot Springs",
+      "category": "Sights",
+      "lat": 44.9766,
+      "lng": -110.7036,
+      "notes": "Terraced travertine terraces — completely unique geology. Near the north entrance and Albright Visitor Center."
+    },
+    {
+      "id": "tower-fall",
+      "kind": "poi",
+      "name": "Tower Fall",
+      "category": "Sights",
+      "lat": 44.8939,
+      "lng": -110.3866,
+      "notes": "132-ft waterfall. Short trail to overlook. Near Tower-Roosevelt junction on the northeast road."
+    },
+    {
+      "id": "gibbon-falls",
+      "kind": "poi",
+      "name": "Gibbon Falls",
+      "category": "Sights",
+      "lat": 44.6519,
+      "lng": -110.7716,
+      "notes": "84-ft falls visible from the road between Madison and Norris. Easy stop on Day 5 morning drive.",
+      "dayIds": ["day5"]
+    },
+    {
+      "id": "firehole-canyon",
+      "kind": "poi",
+      "name": "Firehole Canyon Drive (summer swim)",
+      "category": "Outdoors",
+      "lat": 44.5563,
+      "lng": -110.8669,
+      "notes": "One-way scenic drive with a legal swimming hole in the warm Firehole River. Open summer only. Near Madison. Do this on Day 4 or 5.",
+      "dayIds": ["day4"]
+    },
+    {
+      "id": "lake-hotel",
+      "kind": "poi",
+      "name": "Lake Yellowstone Hotel",
+      "category": "Sights",
+      "lat": 44.5511,
+      "lng": -110.4001,
+      "notes": "Historic 1891 hotel on Yellowstone Lake. Gorgeous views; even non-guests can walk the lobby and lakefront. Near Fishing Bridge."
+    }
+  ]
+}
