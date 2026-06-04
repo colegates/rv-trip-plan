@@ -82,60 +82,45 @@ export const DAY_ROUTES = {
   ],
 };
 
-/* Vector layers to hide when satellite is active (replaced by Esri overlays) */
-const SAT_HIDE_LAYERS = [
-  'background', 'earth', 'water', 'natural',
-  'landuse-park', 'landuse-urban',
-  'roads-minor', 'roads-secondary', 'roads-major-case', 'roads-major',
-  'roads-hw-case', 'roads-highway', 'waterway',
-  /* Also hide PMTiles text labels — Esri overlay provides labels in sat mode */
-  'label-roads-major', 'label-places-small', 'label-places-town',
-  'label-places-city', 'label-states',
-];
-
-/* Esri reference overlay layers shown only in satellite mode */
-const SAT_SHOW_LAYERS = ['esri-places-layer', 'esri-roads-layer'];
-
+/* In satellite mode: hide topo base, show imagery + label overlays.
+   In map mode: show topo base, hide imagery + label overlays. */
 let _satelliteMode = false;
 
 export function toggleSatellite() {
   if (!_map) return false;
   _satelliteMode = !_satelliteMode;
-  const satVis = _satelliteMode ? 'visible' : 'none';
-  const vecVis = _satelliteMode ? 'none'    : 'visible';
-  if (_map.getLayer('satellite-tiles'))
-    _map.setLayoutProperty('satellite-tiles', 'visibility', satVis);
-  for (const id of SAT_HIDE_LAYERS) {
-    if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', vecVis);
+  const topoVis = _satelliteMode ? 'none'    : 'visible';
+  const satVis  = _satelliteMode ? 'visible' : 'none';
+  for (const id of ['esri-topo-layer']) {
+    if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', topoVis);
   }
-  /* Esri label overlays only appear in satellite mode */
-  for (const id of SAT_SHOW_LAYERS) {
+  for (const id of ['satellite-tiles', 'esri-places-layer', 'esri-roads-layer']) {
     if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', satVis);
   }
   return _satelliteMode;
 }
 
-function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
+function buildMapStyle() {
+  /* All sources are Esri raster tile services — same host (server.arcgisonline.com)
+     as the satellite layer, so the existing SW satellite-tile cache covers them all.
+     No PMTiles file required; tiles are cached as-you-browse for offline use. */
   return {
     version: 8,
-    /* Self-hosted glyphs (downloaded at build time, precached by SW) */
-    glyphs: `${glyphsBase}{fontstack}/{range}.pbf`,
     sources: {
-      basemap: {
-        type: 'vector',
-        url: `pmtiles://${pmtilesAbsoluteUrl}`,
-        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> · © <a href="https://protomaps.com" target="_blank">Protomaps</a>'
+      'esri-topo': {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>, HERE, Garmin, USGS, NPS',
       },
       'esri-satellite': {
         type: 'raster',
-        /* Esri World Imagery — free, no API key required for personal use.
-           Tiles are cached by the service worker as you browse (cache-as-you-go). */
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256,
         maxzoom: 19,
         attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>, Maxar, Earthstar Geographics',
       },
-      /* Transparent label overlays for satellite mode (also cached by SW) */
       'esri-places': {
         type: 'raster',
         tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'],
@@ -149,185 +134,28 @@ function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
         tileSize: 256,
         maxzoom: 19,
         attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>',
-      }
+      },
     },
     layers: [
-      /* Satellite raster — below everything, hidden by default */
+      { id: 'background', type: 'background', paint: { 'background-color': '#e8dcc8' } },
+
+      /* Default basemap — Esri World Topo Map (terrain, roads, labels) */
+      { id: 'esri-topo-layer', type: 'raster', source: 'esri-topo',
+        layout: { visibility: 'visible' },
+        paint: { 'raster-opacity': 1 } },
+
+      /* Satellite imagery — hidden until 🛰️ toggle */
       { id: 'satellite-tiles', type: 'raster', source: 'esri-satellite',
         layout: { visibility: 'none' },
         paint: { 'raster-opacity': 1 } },
 
-      { id: 'background', type: 'background', paint: { 'background-color': '#f5efe0' } },
-
-      /* Land */
-      { id: 'earth',         type: 'fill', source: 'basemap', 'source-layer': 'earth',
-        paint: { 'fill-color': '#ecdec7' } },
-
-      /* Water */
-      { id: 'water',         type: 'fill', source: 'basemap', 'source-layer': 'water',
-        paint: { 'fill-color': '#9fc4d0' } },
-
-      /* Natural (parks, forests) */
-      { id: 'natural',       type: 'fill', source: 'basemap', 'source-layer': 'natural',
-        paint: { 'fill-color': '#c5d9aa', 'fill-opacity': 0.85 } },
-      { id: 'landuse-park',  type: 'fill', source: 'basemap', 'source-layer': 'landuse',
-        filter: ['in', ['get', 'kind'], ['literal', ['national_park','park','forest','nature_reserve']]],
-        paint: { 'fill-color': '#b8d49a', 'fill-opacity': 0.7 } },
-      { id: 'landuse-urban', type: 'fill', source: 'basemap', 'source-layer': 'landuse',
-        filter: ['in', ['get', 'kind'], ['literal', ['residential','commercial','industrial']]],
-        paint: { 'fill-color': '#e0d5c0', 'fill-opacity': 0.6 } },
-
-      /* Admin boundaries */
-      { id: 'boundaries',    type: 'line', source: 'basemap', 'source-layer': 'boundaries',
-        filter: ['<=', ['get', 'admin_level'], 4],
-        paint: { 'line-color': '#b8a88a', 'line-width': 0.8, 'line-dasharray': [4, 3] } },
-
-      /* Roads — minor */
-      { id: 'roads-minor',     type: 'line', source: 'basemap', 'source-layer': 'roads',
-        minzoom: 12,
-        filter: ['in', ['get', 'kind'], ['literal', ['minor_road','service','track','path']]],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#e8ddc8', 'line-width': 1 } },
-
-      /* Roads — secondary */
-      { id: 'roads-secondary', type: 'line', source: 'basemap', 'source-layer': 'roads',
-        filter: ['in', ['get', 'kind'], ['literal', ['secondary','tertiary']]],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#ffffff',
-                 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.8, 13, 3] } },
-
-      /* Roads — major (casing then fill) */
-      { id: 'roads-major-case', type: 'line', source: 'basemap', 'source-layer': 'roads',
-        filter: ['==', ['get', 'kind'], 'major_road'],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#c8b070',
-                 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 2, 13, 7] } },
-      { id: 'roads-major',      type: 'line', source: 'basemap', 'source-layer': 'roads',
-        filter: ['==', ['get', 'kind'], 'major_road'],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#f5e090',
-                 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1, 13, 5] } },
-
-      /* Roads — highway (casing then fill) */
-      { id: 'roads-hw-case', type: 'line', source: 'basemap', 'source-layer': 'roads',
-        filter: ['==', ['get', 'kind'], 'highway'],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#b08840',
-                 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 1.5, 12, 10] } },
-      { id: 'roads-highway',  type: 'line', source: 'basemap', 'source-layer': 'roads',
-        filter: ['==', ['get', 'kind'], 'highway'],
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#f8d060',
-                 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 12, 7] } },
-
-      /* Water lines */
-      { id: 'waterway', type: 'line', source: 'basemap', 'source-layer': 'water',
-        filter: ['==', ['geometry-type'], 'LineString'],
-        paint: { 'line-color': '#9fc4d0', 'line-width': 1 } },
-
-      /* ── Esri reference overlays (satellite mode only) ────────────────── */
-      /* Place / admin names — transparent raster overlay */
+      /* Transparent label overlays for satellite mode */
       { id: 'esri-places-layer', type: 'raster', source: 'esri-places',
         layout: { visibility: 'none' },
         paint: { 'raster-opacity': 1 } },
-      /* Road names — transparent raster overlay */
       { id: 'esri-roads-layer', type: 'raster', source: 'esri-roads',
         layout: { visibility: 'none' },
         paint: { 'raster-opacity': 1 } },
-
-      /* ── Text labels (non-satellite mode, from PMTiles vector source) ── */
-
-      /* Road names (along line, high zoom only) */
-      { id: 'label-roads-major', type: 'symbol', source: 'basemap', 'source-layer': 'roads',
-        minzoom: 11,
-        filter: ['in', ['get', 'kind'], ['literal', ['highway','major_road']]],
-        layout: {
-          'text-field': ['coalesce', ['get', 'ref'], ['get', 'name']],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': 11,
-          'symbol-placement': 'line',
-          'text-max-angle': 30,
-          'text-pitch-alignment': 'viewport',
-        },
-        paint: {
-          'text-color': '#5a4020',
-          'text-halo-color': 'rgba(255,255,255,0.85)',
-          'text-halo-width': 1.5,
-        } },
-
-      /* Place labels — villages and hamlets (zoom 10+) */
-      { id: 'label-places-small', type: 'symbol', source: 'basemap', 'source-layer': 'places',
-        minzoom: 10,
-        filter: ['in', ['get', 'kind'], ['literal', ['village','hamlet','suburb','neighbourhood']]],
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': 11,
-          'text-anchor': 'center',
-          'text-max-width': 8,
-          'symbol-sort-key': 3,
-          'icon-allow-overlap': false,
-          'text-allow-overlap': false,
-        },
-        paint: {
-          'text-color': '#3a3020',
-          'text-halo-color': 'rgba(255,255,255,0.9)',
-          'text-halo-width': 1.5,
-        } },
-
-      /* Place labels — towns (zoom 8+) */
-      { id: 'label-places-town', type: 'symbol', source: 'basemap', 'source-layer': 'places',
-        minzoom: 8,
-        filter: ['==', ['get', 'kind'], 'town'],
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 8, 11, 12, 14],
-          'text-anchor': 'center',
-          'text-max-width': 8,
-          'symbol-sort-key': 2,
-        },
-        paint: {
-          'text-color': '#3a3020',
-          'text-halo-color': 'rgba(255,255,255,0.9)',
-          'text-halo-width': 2,
-        } },
-
-      /* Place labels — cities (zoom 5+) */
-      { id: 'label-places-city', type: 'symbol', source: 'basemap', 'source-layer': 'places',
-        minzoom: 5,
-        filter: ['in', ['get', 'kind'], ['literal', ['city','state_capital','national_capital']]],
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Noto Sans Bold'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 5, 11, 8, 15, 12, 18],
-          'text-anchor': 'center',
-          'text-max-width': 8,
-          'symbol-sort-key': 1,
-        },
-        paint: {
-          'text-color': '#2a2010',
-          'text-halo-color': 'rgba(255,255,255,0.95)',
-          'text-halo-width': 2.5,
-        } },
-
-      /* State / region labels */
-      { id: 'label-states', type: 'symbol', source: 'basemap', 'source-layer': 'places',
-        minzoom: 4, maxzoom: 7,
-        filter: ['==', ['get', 'kind'], 'state'],
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Noto Sans Regular'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 7, 13],
-          'text-transform': 'uppercase',
-          'text-letter-spacing': 0.1,
-          'text-max-width': 6,
-        },
-        paint: {
-          'text-color': '#7a6840',
-          'text-halo-color': 'rgba(255,255,255,0.8)',
-          'text-halo-width': 1.5,
-        } },
     ]
   };
 }
@@ -338,15 +166,9 @@ let _map = null;
 export function getMap() { return _map; }
 
 export async function initMap(containerId) {
-  const pmtilesUrl  = new URL('./basemap.pmtiles', location.href).href;
-  const glyphsBase  = new URL('./glyphs/', location.href).href;
-
-  const p = new pmtiles.Protocol();
-  maplibregl.addProtocol('pmtiles', p.tile.bind(p));
-
   _map = new maplibregl.Map({
     container: containerId,
-    style: buildMapStyle(pmtilesUrl, glyphsBase),
+    style: buildMapStyle(),
     center: [-107.8, 43.2],
     zoom: 5.5,
     minZoom: 4,
