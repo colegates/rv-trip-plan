@@ -1,0 +1,74 @@
+name: Build & Commit Basemap
+
+on:
+  workflow_dispatch:
+    inputs:
+      maxzoom:
+        description: 'Max zoom level (12 recommended; use 11 if output >80 MB)'
+        required: false
+        default: '12'
+      bbox:
+        description: 'Bounding box (west,south,east,north)'
+        required: false
+        default: '-111.2,39.6,-104.4,45.2'
+
+jobs:
+  build-basemap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push the commit back
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install pmtiles CLI
+        run: |
+          # Install via Go (fast, single binary)
+          go install github.com/protomaps/go-pmtiles/cmd/pmtiles@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Find latest Protomaps build
+        id: find-build
+        run: |
+          for i in 0 1 2 3 4 5 6 7; do
+            DATE=$(date -d "-${i} days" +%Y%m%d)
+            URL="https://build.protomaps.com/${DATE}.pmtiles"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --head "$URL")
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "206" ]; then
+              echo "build_url=$URL" >> $GITHUB_OUTPUT
+              echo "build_date=$DATE" >> $GITHUB_OUTPUT
+              echo "Found build: $DATE"
+              break
+            fi
+          done
+
+      - name: Extract basemap
+        run: |
+          echo "Extracting from: ${{ steps.find-build.outputs.build_url }}"
+          echo "Bbox: ${{ github.event.inputs.bbox }}"
+          echo "Max zoom: ${{ github.event.inputs.maxzoom }}"
+          pmtiles extract \
+            "${{ steps.find-build.outputs.build_url }}" \
+            basemap.pmtiles \
+            --bbox="${{ github.event.inputs.bbox }}" \
+            --maxzoom="${{ github.event.inputs.maxzoom }}"
+          SIZE=$(du -sh basemap.pmtiles | cut -f1)
+          SIZE_MB=$(du -m basemap.pmtiles | cut -f1)
+          echo "Output size: $SIZE"
+          if [ "$SIZE_MB" -gt 95 ]; then
+            echo "::warning::basemap.pmtiles is ${SIZE_MB} MB — close to GitHub's 100 MB limit. Consider re-running with maxzoom=11."
+          fi
+
+      - name: Commit basemap
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add basemap.pmtiles
+          if git diff --cached --quiet; then
+            echo "No changes to commit (basemap unchanged)"
+          else
+            SIZE=$(du -sh basemap.pmtiles | cut -f1)
+            git commit -m "Update basemap.pmtiles from Protomaps build ${{ steps.find-build.outputs.build_date }} (zoom 0-${{ github.event.inputs.maxzoom }}, ${SIZE})"
+            git push
+          fi
