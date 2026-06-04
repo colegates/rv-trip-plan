@@ -2,7 +2,7 @@
    Cache version: bump CACHE_VERSION to force a full refresh on all clients.
 */
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
 
 /* Satellite tile cache — kept separate so it survives main cache version bumps */
@@ -32,6 +32,7 @@ const PRECACHE_URLS = [
   './js/markers.js',
   './js/ui-import.js',
   './js/ui-itinerary.js',
+  './js/tile-precache.js',
   './lib/maplibre-gl.js',
   './lib/maplibre-gl.css',
   './lib/pmtiles.js',

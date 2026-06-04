@@ -157,6 +157,19 @@
       </div>
 
       <div class="info-section">
+        <div class="info-section-title">Offline Maps</div>
+        <p class="info-section-desc">Cache all map and satellite tiles for the trip area so the app works with no cell signal inside Yellowstone.</p>
+        <div id="tile-cache-status" class="tile-cache-status not-cached">Checking…</div>
+        <div id="tile-cache-bar" class="tile-cache-progress-bar" style="display:none">
+          <div id="tile-cache-fill" class="tile-cache-progress-fill"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-green" id="tile-cache-btn">📥 Download Offline Maps</button>
+          <button class="btn btn-ghost" id="tile-cache-reset-btn">🗑️ Re-download</button>
+        </div>
+      </div>
+
+      <div class="info-section">
         <div class="info-section-title">App Status</div>
         <div class="storage-row">
           <div id="storage-info">Calculating storage…</div>
