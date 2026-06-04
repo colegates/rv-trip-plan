@@ -701,6 +701,27 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .confirm-btns { display: flex; gap: 10px; }
 .confirm-btns .btn { flex: 1; justify-content: center; }
 
+/* ─── Route popup (MapLibre Popup) ─────────────────────────────────────── */
+.route-popup .maplibregl-popup-content {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 220px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+  font-family: inherit;
+}
+.route-popup .maplibregl-popup-close-button {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 6px 10px;
+}
+.route-popup .maplibregl-popup-tip { border-top-color: var(--surface); }
+.route-popup h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
+.route-popup .popup-date { font-size: .8rem; color: var(--text-muted); margin-bottom: 8px; }
+.route-popup .popup-stat { font-size: .85rem; margin: 2px 0; }
+.route-popup .popup-summary { font-size: .82rem; color: var(--text-muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.45; }
+
 /* ─── Utility ───────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }

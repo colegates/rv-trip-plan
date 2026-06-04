@@ -26,17 +26,21 @@ let _currentDayFilter = null;   // null = all days
 
 /* ── Marker element factory ──────────────────────────────────────────────── */
 function makeMarkerEl(place) {
-  const el = document.createElement('div');
-  el.className = 'map-marker';
-  el.style.cssText = [
-    'position:relative', 'cursor:pointer', 'width:32px', 'height:32px',
+  /* MapLibre sets transform on the element passed as `element:`, so we use a
+     wrapper for positioning and scale the inner visual element on hover. */
+  const wrapper = document.createElement('div');
+  wrapper.className = 'map-marker';
+  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer;position:relative';
+
+  const inner = document.createElement('div');
+  inner.style.cssText = [
+    'width:32px', 'height:32px',
     'display:flex', 'align-items:center', 'justify-content:center',
     'border-radius:50%', 'border:2px solid rgba(255,255,255,.85)',
     'box-shadow:0 2px 6px rgba(0,0,0,.3)',
     'font-size:16px', 'line-height:1',
-    'transition:transform .15s',
-    'user-select:none',
-    '-webkit-user-select:none',
+    'transition:transform .15s, box-shadow .15s',
+    'user-select:none', '-webkit-user-select:none',
   ].join(';');
 
   let bg, text;
@@ -49,13 +53,20 @@ function makeMarkerEl(place) {
     text = CATEGORY_EMOJI[place.category] || '⭐';
   }
 
-  el.style.background = bg;
-  el.textContent = text;
+  inner.style.background = bg;
+  inner.textContent = text;
 
-  el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.15)'; });
-  el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+  inner.addEventListener('mouseenter', () => {
+    inner.style.transform = 'scale(1.2) translateY(-2px)';
+    inner.style.boxShadow = '0 4px 12px rgba(0,0,0,.4)';
+  });
+  inner.addEventListener('mouseleave', () => {
+    inner.style.transform = '';
+    inner.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+  });
 
-  return el;
+  wrapper.appendChild(inner);
+  return wrapper;
 }
 
 /* ── Render all markers ──────────────────────────────────────────────────── */
