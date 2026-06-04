@@ -31,7 +31,7 @@ jobs:
           curl -sL "https://github.com/protomaps/go-pmtiles/releases/download/v${VERSION}/go-pmtiles_${VERSION}_Linux_x86_64.tar.gz" \
             | tar xz pmtiles
           sudo mv pmtiles /usr/local/bin/
-          pmtiles --version
+          pmtiles version
 
       - name: Find latest Protomaps build
         id: find-build
