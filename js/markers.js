@@ -1,6 +1,6 @@
 /* Marker management — creates MapLibre HTML markers and handles bottom-sheet */
 
-import { getMap, DAY_COLORS, flyToPlace } from './map-init.js';
+import { getMap, DAY_COLORS, flyToPlace, setRouteVisibility } from './map-init.js';
 import { getDistanceEta, formatDistance } from './gps.js';
 
 const CATEGORY_EMOJI = {
@@ -280,15 +280,37 @@ export function updateGpsMarker(lat, lng) {
 }
 
 /* ── Day legend ──────────────────────────────────────────────────────────── */
+const _hiddenDays = new Set();   /* day IDs whose routes are currently hidden */
+
 export function renderDayLegend(days) {
   const legend = document.getElementById('day-legend');
   legend.innerHTML = '';
+
   for (const day of days) {
     const color = DAY_COLORS[day.id] || '#888';
     const row = document.createElement('div');
-    row.className = 'legend-row';
+    row.className = 'legend-row legend-toggle';
+    if (_hiddenDays.has(day.id)) row.classList.add('legend-off');
     row.innerHTML = `<span class="legend-swatch" style="background:${color}"></span>
-                     <span>${day.title || day.id}</span>`;
+                     <span class="legend-label">${day.title || day.id}</span>
+                     <span class="legend-eye">${_hiddenDays.has(day.id) ? '👁️‍🗨️' : '👁️'}</span>`;
+
+    row.addEventListener('click', () => {
+      const isHidden = _hiddenDays.has(day.id);
+      if (isHidden) {
+        _hiddenDays.delete(day.id);
+        row.classList.remove('legend-off');
+        row.querySelector('.legend-eye').textContent = '👁️';
+      } else {
+        _hiddenDays.add(day.id);
+        row.classList.add('legend-off');
+        row.querySelector('.legend-eye').textContent = '👁️‍🗨️';
+      }
+      /* Show all days that are NOT hidden */
+      const visible = days.map(d => d.id).filter(id => !_hiddenDays.has(id));
+      setRouteVisibility(visible);
+    });
+
     legend.appendChild(row);
   }
   legend.classList.add('visible');
