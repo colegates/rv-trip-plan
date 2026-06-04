@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RV Trip — Denver ↔ Yellowstone</title>
+
+  <!-- PWA / iOS -->
+  <meta name="theme-color" content="#2d5a27">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RV Trip">
+  <meta name="description" content="Offline-first road trip companion — Denver to Yellowstone, July 2026">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+
+  <!-- Self-hosted libraries -->
+  <link rel="stylesheet" href="./lib/maplibre-gl.css">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+<!-- ── Loading overlay ─────────────────────────────────────────────────── -->
+<div id="loading">
+  <div class="loading-logo">🏔️</div>
+  <div class="loading-title">RV Trip</div>
+  <div class="loading-sub">Denver ↔ Yellowstone · July 2026</div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div id="loading-status">Starting…</div>
+</div>
+
+<!-- ── App shell ───────────────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Header -->
+  <header id="header">
+    <h1>🏕️ Denver ↔ Yellowstone</h1>
+    <div id="status-pill" class="status-pill offline">Offline</div>
+  </header>
+
+  <!-- Panels -->
+  <main id="panels">
+
+    <!-- MAP -->
+    <section id="panel-map" class="panel" role="main" aria-label="Map">
+
+      <!-- Filter chips -->
+      <div id="filter-bar" role="toolbar" aria-label="Filter points of interest">
+        <button class="chip active" data-filter="Sights"       aria-pressed="true">🏔️ Sights</button>
+        <button class="chip active" data-filter="Wildlife"     aria-pressed="true">🦬 Wildlife</button>
+        <button class="chip active" data-filter="History"      aria-pressed="true">🏛️ History</button>
+        <button class="chip active" data-filter="Food/Brewery" aria-pressed="true">🍺 Food/Brew</button>
+        <button class="chip active" data-filter="Outdoors"     aria-pressed="true">🌲 Outdoors</button>
+        <button class="chip active" data-filter="Fuel/Services" aria-pressed="true">⛽ Fuel</button>
+        <button class="chip active" data-filter="Lodging"      aria-pressed="true">🏨 Lodging</button>
+      </div>
+
+      <!-- Map container -->
+      <div id="map" role="application" aria-label="Interactive trip map"></div>
+
+      <!-- Day legend -->
+      <div id="day-legend" aria-label="Route day legend"></div>
+
+      <!-- Map controls -->
+      <div id="map-controls">
+        <button class="map-btn" id="locate-btn" aria-label="Locate me on map" title="Locate me">📍</button>
+        <button class="map-btn" id="fit-btn"    aria-label="Fit entire trip"   title="Fit trip">🗺️</button>
+      </div>
+
+      <!-- Bottom sheet (place card) -->
+      <div id="bottom-sheet" role="dialog" aria-label="Place details" aria-modal="false">
+        <div id="bs-handle"></div>
+        <div id="bs-body">
+          <span id="bs-kind-badge" class="badge-stop">Stop</span>
+          <h2 id="bs-name">Place name</h2>
+          <div id="bs-days"></div>
+          <p id="bs-notes"></p>
+          <p id="bs-address"></p>
+          <div class="bs-actions"></div>
+          <div id="bs-gps-result">
+            <div id="bs-gps-text"></div>
+            <div id="bs-gps-label"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ITINERARY -->
+    <section id="panel-itinerary" class="panel" role="main" aria-label="Day-by-day itinerary">
+      <div id="itinerary-list"></div>
+    </section>
+
+    <!-- INFO -->
+    <section id="panel-info" class="panel" role="main" aria-label="Trip info and contacts">
+
+      <div class="info-section">
+        <div class="info-section-title">Trip</div>
+        <div class="trip-meta-row">
+          <div class="trip-meta-label">Title</div>
+          <div id="trip-title-meta">Denver ↔ Yellowstone RV Trip</div>
+        </div>
+        <div class="trip-meta-row">
+          <div class="trip-meta-label">Vehicle</div>
+          <div id="trip-vehicle-meta">Road Bear Class C 29–31'</div>
+        </div>
+        <div class="trip-meta-row">
+          <div class="trip-meta-label">Booking</div>
+          <div id="trip-booking-meta">CXF847765-1</div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title">Key Phone Numbers</div>
+        <div class="phone-row">
+          <span class="phone-label">Road Bear RV Depot</span>
+          <a class="phone-num" href="tel:+17205701100">+1 720-570-1100</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Yellowstone NP Lodges</span>
+          <a class="phone-num" href="tel:+13073447311">+1 307-344-7311</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Yellowstone Dispatch</span>
+          <a class="phone-num" href="tel:+13073442132">+1 307-344-2132</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Casper KOA</span>
+          <a class="phone-num" href="tel:+13075771664">+1 307-577-1664</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Parkway RV (Cody)</span>
+          <a class="phone-num" href="tel:+13075275927">+1 307-527-5927</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Fort Collins KOA</span>
+          <a class="phone-num" href="tel:+19704849880">+1 970-484-9880</a>
+        </div>
+        <div class="phone-row">
+          <span class="phone-label">Emergency</span>
+          <a class="phone-num" href="tel:911">911</a>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title">Don't Forget</div>
+        <div class="reminder-row"><span class="reminder-icon">⛽</span><span>Fuel full in <strong>Cody</strong> before entering Yellowstone. Last good-value station.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">🕙</span><span>Return RV <strong>full</strong>. Drop at Road Bear by <strong>10:30 am Wed 15 Jul</strong>. Fly 14:05.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">🐻</span><span>Bear safety: store food inside the RV. Stay <strong>100 yds</strong> from bears &amp; wolves, <strong>25 yds</strong> from all other wildlife.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">📵</span><span>No cell signal inside most of Yellowstone. Download offline maps / tell family your plan before entering.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">🎟️</span><span>Park pass: <strong>$35/vehicle</strong> (7-day) or <strong>$80 annual</strong> (America the Beautiful). Buy online in advance.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">🛣️</span><span>1,400 miles included; overage ~$0.45/mi. Keep an eye on odometer.</span></div>
+        <div class="reminder-row"><span class="reminder-icon">🌡️</span><span>July temperatures: Denver 95°F days; Yellowstone 75°F days, 40°F nights. Layer up!</span></div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-section-title">App Status</div>
+        <div class="storage-row">
+          <div id="storage-info">Calculating storage…</div>
+          <div style="margin-top:4px">Network: <span id="info-network-status">—</span></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- IMPORT / EXPORT -->
+    <section id="panel-import" class="panel" role="main" aria-label="Import and export itinerary">
+
+      <div class="import-section">
+        <h2>Import / Update Itinerary</h2>
+        <p>Paste a JSON document in <strong>rvtrip.v1</strong> format below. The app will validate it, show a preview diff, and ask for confirmation before applying any changes.</p>
+        <textarea
+          id="import-paste"
+          placeholder='{"schema":"rvtrip.v1","mode":"merge", ...}'
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Import JSON paste area"
+        ></textarea>
+        <div id="import-feedback" role="alert"></div>
+        <div id="import-preview" aria-live="polite"></div>
+        <div class="btn-row">
+          <button class="btn btn-green" id="import-parse-btn">🔍 Validate &amp; Preview</button>
+        </div>
+      </div>
+
+      <div class="import-section">
+        <h2>Export &amp; Backup</h2>
+        <p>Download or share a complete backup of your current itinerary as an <strong>rvtrip.v1</strong> file. You can paste this back into Import to restore it on any device.</p>
+        <div class="btn-row">
+          <button class="btn btn-earth" id="export-btn">📤 Export Current Itinerary</button>
+        </div>
+      </div>
+
+      <div class="import-section">
+        <h2>Reset</h2>
+        <p>Restore the original bundled trip data from <code>trip.json</code>. Your current data will be snapshotted first so you can undo.</p>
+        <div class="btn-row">
+          <button class="btn btn-danger" id="reset-btn">⚠️ Reset to Bundled Itinerary</button>
+        </div>
+      </div>
+
+      <div class="import-section">
+        <h2>Import History</h2>
+        <ul id="import-history" aria-label="Import history"></ul>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Tab bar -->
+  <nav id="tab-bar" role="tablist" aria-label="Main navigation">
+    <button class="tab-btn active" data-tab="map"       role="tab" aria-selected="true">
+      <span class="tab-icon">🗺️</span><span>Map</span>
+    </button>
+    <button class="tab-btn" data-tab="itinerary"  role="tab" aria-selected="false">
+      <span class="tab-icon">📅</span><span>Itinerary</span>
+    </button>
+    <button class="tab-btn" data-tab="info"       role="tab" aria-selected="false">
+      <span class="tab-icon">ℹ️</span><span>Info</span>
+    </button>
+    <button class="tab-btn" data-tab="import"     role="tab" aria-selected="false">
+      <span class="tab-icon">📥</span><span>Import</span>
+    </button>
+  </nav>
+
+</div><!-- #app -->
+
+<!-- ── Confirm dialog ──────────────────────────────────────────────────── -->
+<div id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div id="confirm-sheet">
+    <h2 id="confirm-title">Are you sure?</h2>
+    <p id="confirm-message"></p>
+    <div class="confirm-btns">
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+      <button class="btn btn-ghost"  id="confirm-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ────────────────────────────────────────────────────────────── -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Self-hosted libraries (global scope for map-init.js access) -->
+<script src="./lib/maplibre-gl.js"></script>
+<script src="./lib/pmtiles.js"></script>
+
+<!-- App (ES modules) -->
+<script type="module" src="./js/app.js"></script>
+
+<script>
+  /* Info panel network status live update */
+  document.addEventListener('DOMContentLoaded', () => {
+    function updateInfoNet() {
+      const el = document.getElementById('info-network-status');
+      if (el) el.textContent = navigator.onLine ? '🟢 Online' : '🔴 Offline';
+    }
+    updateInfoNet();
+    window.addEventListener('online',  updateInfoNet);
+    window.addEventListener('offline', updateInfoNet);
+  });
+</script>
+
+</body>
+</html>
