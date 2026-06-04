@@ -189,14 +189,16 @@ export async function initMap(containerId) {
 }
 
 /* ── Route layers ────────────────────────────────────────────────────────── */
+function lineFeature(dayId, coords) {
+  return { type: 'Feature', properties: { dayId }, geometry: { type: 'LineString', coordinates: coords } };
+}
+
 function addRouteLayers() {
   if (!_map) return;
   for (const [dayId, coords] of Object.entries(DAY_ROUTES)) {
     const src = `route-${dayId}`;
-    _map.addSource(src, {
-      type: 'geojson',
-      data: { type: 'Feature', properties: { dayId }, geometry: { type: 'LineString', coordinates: coords } }
-    });
+    /* Draw straight waypoint lines immediately so something appears offline */
+    _map.addSource(src, { type: 'geojson', data: lineFeature(dayId, coords) });
 
     /* White casing */
     _map.addLayer({
@@ -223,6 +225,43 @@ function addRouteLayers() {
       paint: { 'line-color': 'transparent', 'line-width': 24, 'line-opacity': 0 }
     });
   }
+
+  /* Upgrade each route to road-following geometry from OSRM (async) */
+  upgradeRoutesToRoads();
+}
+
+/* Fetch road-following route geometry from OSRM, cache in localStorage */
+async function getRoadRoute(dayId, waypoints) {
+  const cacheKey = `rv-route-v1-${dayId}`;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch {}
+
+  const coordStr = waypoints.map(([lng, lat]) => `${lng},${lat}`).join(';');
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+  if (!res.ok) throw new Error(`OSRM ${res.status}`);
+  const data = await res.json();
+  if (!data.routes?.[0]?.geometry?.coordinates) throw new Error('No route data');
+  const coords = data.routes[0].geometry.coordinates;
+
+  try { localStorage.setItem(cacheKey, JSON.stringify(coords)); } catch {}
+  return coords;
+}
+
+/* Upgrade all route sources in parallel; keep straight-line fallback on error */
+async function upgradeRoutesToRoads() {
+  await Promise.allSettled(
+    Object.entries(DAY_ROUTES).map(async ([dayId, waypoints]) => {
+      try {
+        const coords = await getRoadRoute(dayId, waypoints);
+        if (!_map) return;
+        const src = _map.getSource(`route-${dayId}`);
+        if (src) src.setData(lineFeature(dayId, coords));
+      } catch { /* silently keep straight-line fallback */ }
+    })
+  );
 }
 
 /* ── Route interactivity (call after days data is loaded) ────────────────── */
