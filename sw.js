@@ -2,7 +2,7 @@
    Cache version: bump CACHE_VERSION to force a full refresh on all clients.
 */
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
 
 /* Satellite tile cache — kept separate so it survives main cache version bumps */
@@ -254,9 +254,20 @@ async function handlePMTilesRequest(request) {
     });
   }
 
-  /* Not in cache — pass through to network */
+  /* Not in cache — pass through to network.
+     Build a fresh Request rather than forwarding the original: Safari strips
+     Range headers when a SW passes the original Request object to fetch(),
+     which causes PMTiles to receive 200 full-file responses instead of the
+     206 partial it needs, silently breaking the entire vector basemap. */
   try {
-    return await fetch(request);
+    const range = request.headers.get('Range');
+    const fresh = new Request(request.url, {
+      method:      'GET',
+      headers:     range ? { Range: range } : {},
+      mode:        'cors',
+      credentials: 'omit',
+    });
+    return await fetch(fresh);
   } catch {
     return new Response('PMTiles offline — basemap not cached', { status: 503 });
   }
