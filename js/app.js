@@ -1,7 +1,7 @@
 /* Main app orchestrator */
 
 import { openDB, isEmpty, replaceAll, getTripMeta, getAllDays, getAllPlaces, getStorageEstimate } from './db.js';
-import { initMap, fitTrip, flyToPlace } from './map-init.js';
+import { initMap, fitTrip, flyToPlace, setupRouteClicks, toggleSatellite } from './map-init.js';
 import { renderMarkers, toggleFilter, getActiveFilters, closeBottomSheet, updateGpsMarker, renderDayLegend } from './markers.js';
 import { initItinerary, updateItinerary } from './ui-itinerary.js';
 import { initImport } from './ui-import.js';
@@ -179,6 +179,7 @@ async function boot() {
   setLoadingStatus('Placing markers…');
   renderMarkers(places, days);
   renderDayLegend(days);
+  setupRouteClicks(days);
   fitTrip();
   setLoadingProgress(85);
 
@@ -203,6 +204,15 @@ async function boot() {
   /* Bottom sheet close on map tap */
   document.getElementById('map')?.addEventListener('click', e => {
     if (!e.target.closest('.map-marker')) closeBottomSheet();
+  });
+
+  /* Satellite toggle button */
+  document.getElementById('sat-btn')?.addEventListener('click', () => {
+    const btn  = document.getElementById('sat-btn');
+    const isOn = toggleSatellite();
+    btn.classList.toggle('active', isOn);
+    btn.setAttribute('aria-pressed', String(isOn));
+    showToast(isOn ? '🛰️ Satellite — browse to cache tiles offline' : '🗺️ Map view');
   });
 
   /* Fit-trip button */

@@ -2,8 +2,21 @@
    Cache version: bump CACHE_VERSION to force a full refresh on all clients.
 */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
+
+/* Satellite tile cache — kept separate so it survives main cache version bumps */
+const SAT_CACHE = 'rv-trip-satellite-v1';
+const SAT_HOST  = 'server.arcgisonline.com';
+
+/* Minimal 1×1 transparent PNG returned when a satellite tile is unavailable offline */
+const EMPTY_TILE = (() => {
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  const raw = atob(b64);
+  const buf = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+  return buf;
+})();
 
 /* App shell + data files to precache on install */
 const PRECACHE_URLS = [
@@ -26,6 +39,10 @@ const PRECACHE_URLS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './glyphs/Noto Sans Regular/0-255.pbf',
+  './glyphs/Noto Sans Regular/256-511.pbf',
+  './glyphs/Noto Sans Bold/0-255.pbf',
+  './glyphs/Noto Sans Bold/256-511.pbf',
 ];
 
 /* PMTiles basemap — large file, handled separately with range-request caching */
@@ -121,7 +138,8 @@ self.addEventListener('activate', event => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter(k => k.startsWith('rv-trip-') && k !== CACHE_NAME)
+        /* Preserve satellite cache across main version bumps */
+        keys.filter(k => k.startsWith('rv-trip-') && k !== CACHE_NAME && k !== SAT_CACHE)
             .map(k => caches.delete(k))
       );
       await self.clients.claim();
@@ -140,6 +158,12 @@ self.addEventListener('fetch', event => {
   /* PMTiles range requests → serve sliced from cached blob */
   if (request.url === PMTILES_URL || url.pathname.endsWith('.pmtiles')) {
     event.respondWith(handlePMTilesRequest(request));
+    return;
+  }
+
+  /* Satellite tiles — cache-as-you-go, separate long-lived cache */
+  if (url.hostname === SAT_HOST) {
+    event.respondWith(handleSatelliteTile(request));
     return;
   }
 
@@ -163,6 +187,25 @@ async function cacheFirst(request) {
     return res;
   } catch (e) {
     return new Response('Offline — resource not cached', { status: 503 });
+  }
+}
+
+/* ── Satellite tile handler (cache-as-you-go) ────────────────────────────── */
+async function handleSatelliteTile(request) {
+  const cache  = await caches.open(SAT_CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(request);
+    if (res.ok) cache.put(request, res.clone());
+    return res;
+  } catch {
+    /* Offline and tile not cached — return transparent placeholder */
+    return new Response(EMPTY_TILE, {
+      status: 200,
+      headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' },
+    });
   }
 }
 

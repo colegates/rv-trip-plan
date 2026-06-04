@@ -1,4 +1,4 @@
-/* MapLibre + PMTiles initialisation and basemap style */
+/* MapLibre + PMTiles initialisation, basemap style, route interactivity */
 
 /* Day colours — must match CSS variables */
 export const DAY_COLORS = {
@@ -82,84 +82,217 @@ export const DAY_ROUTES = {
   ],
 };
 
-function buildMapStyle(pmtilesAbsoluteUrl) {
+/* Vector fill/road layer IDs to hide when satellite is active */
+const SAT_HIDE_LAYERS = [
+  'background', 'earth', 'water', 'natural',
+  'landuse-park', 'landuse-urban',
+  'roads-minor', 'roads-secondary', 'roads-major-case', 'roads-major',
+  'roads-hw-case', 'roads-highway', 'waterway',
+];
+
+let _satelliteMode = false;
+
+export function toggleSatellite() {
+  if (!_map) return false;
+  _satelliteMode = !_satelliteMode;
+  const satVis = _satelliteMode ? 'visible' : 'none';
+  const vecVis = _satelliteMode ? 'none'    : 'visible';
+  if (_map.getLayer('satellite-tiles'))
+    _map.setLayoutProperty('satellite-tiles', 'visibility', satVis);
+  for (const id of SAT_HIDE_LAYERS) {
+    if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', vecVis);
+  }
+  return _satelliteMode;
+}
+
+function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
   return {
     version: 8,
+    /* Self-hosted glyphs (downloaded at build time, precached by SW) */
+    glyphs: `${glyphsBase}{fontstack}/{range}.pbf`,
     sources: {
       basemap: {
         type: 'vector',
         url: `pmtiles://${pmtilesAbsoluteUrl}`,
-        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors · © <a href="https://protomaps.com" target="_blank">Protomaps</a>'
+        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> · © <a href="https://protomaps.com" target="_blank">Protomaps</a>'
+      },
+      'esri-satellite': {
+        type: 'raster',
+        /* Esri World Imagery — free, no API key required for personal use.
+           Tiles are cached by the service worker as you browse (cache-as-you-go). */
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>, Maxar, Earthstar Geographics',
       }
     },
     layers: [
-      { id: 'background',      type: 'background', paint: { 'background-color': '#f5efe0' } },
+      /* Satellite raster — below everything, hidden by default */
+      { id: 'satellite-tiles', type: 'raster', source: 'esri-satellite',
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 1 } },
+
+      { id: 'background', type: 'background', paint: { 'background-color': '#f5efe0' } },
 
       /* Land */
-      { id: 'earth',            type: 'fill',   source: 'basemap', 'source-layer': 'earth',
+      { id: 'earth',         type: 'fill', source: 'basemap', 'source-layer': 'earth',
         paint: { 'fill-color': '#ecdec7' } },
 
       /* Water */
-      { id: 'water',            type: 'fill',   source: 'basemap', 'source-layer': 'water',
+      { id: 'water',         type: 'fill', source: 'basemap', 'source-layer': 'water',
         paint: { 'fill-color': '#9fc4d0' } },
 
       /* Natural (parks, forests) */
-      { id: 'natural',          type: 'fill',   source: 'basemap', 'source-layer': 'natural',
+      { id: 'natural',       type: 'fill', source: 'basemap', 'source-layer': 'natural',
         paint: { 'fill-color': '#c5d9aa', 'fill-opacity': 0.85 } },
-      { id: 'landuse-park',     type: 'fill',   source: 'basemap', 'source-layer': 'landuse',
-        filter: ['in', ['get', 'kind'], ['literal', ['national_park', 'park', 'forest', 'nature_reserve']]],
+      { id: 'landuse-park',  type: 'fill', source: 'basemap', 'source-layer': 'landuse',
+        filter: ['in', ['get', 'kind'], ['literal', ['national_park','park','forest','nature_reserve']]],
         paint: { 'fill-color': '#b8d49a', 'fill-opacity': 0.7 } },
-      { id: 'landuse-urban',    type: 'fill',   source: 'basemap', 'source-layer': 'landuse',
-        filter: ['in', ['get', 'kind'], ['literal', ['residential', 'commercial', 'industrial']]],
+      { id: 'landuse-urban', type: 'fill', source: 'basemap', 'source-layer': 'landuse',
+        filter: ['in', ['get', 'kind'], ['literal', ['residential','commercial','industrial']]],
         paint: { 'fill-color': '#e0d5c0', 'fill-opacity': 0.6 } },
 
       /* Admin boundaries */
-      { id: 'boundaries',       type: 'line',   source: 'basemap', 'source-layer': 'boundaries',
+      { id: 'boundaries',    type: 'line', source: 'basemap', 'source-layer': 'boundaries',
         filter: ['<=', ['get', 'admin_level'], 4],
         paint: { 'line-color': '#b8a88a', 'line-width': 0.8, 'line-dasharray': [4, 3] } },
 
-      /* Roads — minor (high zoom only) */
-      { id: 'roads-minor',      type: 'line',   source: 'basemap', 'source-layer': 'roads',
+      /* Roads — minor */
+      { id: 'roads-minor',     type: 'line', source: 'basemap', 'source-layer': 'roads',
         minzoom: 12,
-        filter: ['in', ['get', 'kind'], ['literal', ['minor_road', 'service', 'track', 'path']]],
+        filter: ['in', ['get', 'kind'], ['literal', ['minor_road','service','track','path']]],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#e8ddc8', 'line-width': 1 } },
 
       /* Roads — secondary */
-      { id: 'roads-secondary',  type: 'line',   source: 'basemap', 'source-layer': 'roads',
-        filter: ['in', ['get', 'kind'], ['literal', ['secondary', 'tertiary']]],
+      { id: 'roads-secondary', type: 'line', source: 'basemap', 'source-layer': 'roads',
+        filter: ['in', ['get', 'kind'], ['literal', ['secondary','tertiary']]],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#ffffff',
                  'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.8, 13, 3] } },
 
-      /* Roads — major (casing) */
-      { id: 'roads-major-case', type: 'line',   source: 'basemap', 'source-layer': 'roads',
+      /* Roads — major (casing then fill) */
+      { id: 'roads-major-case', type: 'line', source: 'basemap', 'source-layer': 'roads',
         filter: ['==', ['get', 'kind'], 'major_road'],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#c8b070',
                  'line-width': ['interpolate', ['linear'], ['zoom'], 6, 2, 13, 7] } },
-      { id: 'roads-major',      type: 'line',   source: 'basemap', 'source-layer': 'roads',
+      { id: 'roads-major',      type: 'line', source: 'basemap', 'source-layer': 'roads',
         filter: ['==', ['get', 'kind'], 'major_road'],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#f5e090',
                  'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1, 13, 5] } },
 
-      /* Roads — highway (casing) */
-      { id: 'roads-hw-case',    type: 'line',   source: 'basemap', 'source-layer': 'roads',
+      /* Roads — highway (casing then fill) */
+      { id: 'roads-hw-case', type: 'line', source: 'basemap', 'source-layer': 'roads',
         filter: ['==', ['get', 'kind'], 'highway'],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#b08840',
                  'line-width': ['interpolate', ['linear'], ['zoom'], 4, 1.5, 12, 10] } },
-      { id: 'roads-highway',    type: 'line',   source: 'basemap', 'source-layer': 'roads',
+      { id: 'roads-highway',  type: 'line', source: 'basemap', 'source-layer': 'roads',
         filter: ['==', ['get', 'kind'], 'highway'],
         layout: { 'line-join': 'round', 'line-cap': 'round' },
         paint: { 'line-color': '#f8d060',
                  'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 12, 7] } },
 
       /* Water lines */
-      { id: 'waterway',         type: 'line',   source: 'basemap', 'source-layer': 'water',
+      { id: 'waterway', type: 'line', source: 'basemap', 'source-layer': 'water',
         filter: ['==', ['geometry-type'], 'LineString'],
         paint: { 'line-color': '#9fc4d0', 'line-width': 1 } },
+
+      /* ── Text labels ──────────────────────────────────────────────────── */
+
+      /* Road names (along line, high zoom only) */
+      { id: 'label-roads-major', type: 'symbol', source: 'basemap', 'source-layer': 'roads',
+        minzoom: 11,
+        filter: ['in', ['get', 'kind'], ['literal', ['highway','major_road']]],
+        layout: {
+          'text-field': ['coalesce', ['get', 'ref'], ['get', 'name']],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': 11,
+          'symbol-placement': 'line',
+          'text-max-angle': 30,
+          'text-pitch-alignment': 'viewport',
+        },
+        paint: {
+          'text-color': '#5a4020',
+          'text-halo-color': 'rgba(255,255,255,0.85)',
+          'text-halo-width': 1.5,
+        } },
+
+      /* Place labels — villages and hamlets (zoom 10+) */
+      { id: 'label-places-small', type: 'symbol', source: 'basemap', 'source-layer': 'places',
+        minzoom: 10,
+        filter: ['in', ['get', 'kind'], ['literal', ['village','hamlet','suburb','neighbourhood']]],
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': 11,
+          'text-anchor': 'center',
+          'text-max-width': 8,
+          'symbol-sort-key': 3,
+          'icon-allow-overlap': false,
+          'text-allow-overlap': false,
+        },
+        paint: {
+          'text-color': '#3a3020',
+          'text-halo-color': 'rgba(255,255,255,0.9)',
+          'text-halo-width': 1.5,
+        } },
+
+      /* Place labels — towns (zoom 8+) */
+      { id: 'label-places-town', type: 'symbol', source: 'basemap', 'source-layer': 'places',
+        minzoom: 8,
+        filter: ['==', ['get', 'kind'], 'town'],
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 8, 11, 12, 14],
+          'text-anchor': 'center',
+          'text-max-width': 8,
+          'symbol-sort-key': 2,
+        },
+        paint: {
+          'text-color': '#3a3020',
+          'text-halo-color': 'rgba(255,255,255,0.9)',
+          'text-halo-width': 2,
+        } },
+
+      /* Place labels — cities (zoom 5+) */
+      { id: 'label-places-city', type: 'symbol', source: 'basemap', 'source-layer': 'places',
+        minzoom: 5,
+        filter: ['in', ['get', 'kind'], ['literal', ['city','state_capital','national_capital']]],
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 5, 11, 8, 15, 12, 18],
+          'text-anchor': 'center',
+          'text-max-width': 8,
+          'symbol-sort-key': 1,
+        },
+        paint: {
+          'text-color': '#2a2010',
+          'text-halo-color': 'rgba(255,255,255,0.95)',
+          'text-halo-width': 2.5,
+        } },
+
+      /* State / region labels */
+      { id: 'label-states', type: 'symbol', source: 'basemap', 'source-layer': 'places',
+        minzoom: 4, maxzoom: 7,
+        filter: ['==', ['get', 'kind'], 'state'],
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 4, 10, 7, 13],
+          'text-transform': 'uppercase',
+          'text-letter-spacing': 0.1,
+          'text-max-width': 6,
+        },
+        paint: {
+          'text-color': '#7a6840',
+          'text-halo-color': 'rgba(255,255,255,0.8)',
+          'text-halo-width': 1.5,
+        } },
     ]
   };
 }
@@ -170,98 +303,143 @@ let _map = null;
 export function getMap() { return _map; }
 
 export async function initMap(containerId) {
-  const pmtilesUrl = new URL('./basemap.pmtiles', location.href).href;
+  const pmtilesUrl  = new URL('./basemap.pmtiles', location.href).href;
+  const glyphsBase  = new URL('./glyphs/', location.href).href;
 
-  /* Register PMTiles protocol */
   const p = new pmtiles.Protocol();
   maplibregl.addProtocol('pmtiles', p.tile.bind(p));
 
   _map = new maplibregl.Map({
     container: containerId,
-    style: buildMapStyle(pmtilesUrl),
+    style: buildMapStyle(pmtilesUrl, glyphsBase),
     center: [-107.8, 43.2],
     zoom: 5.5,
     minZoom: 4,
     maxZoom: 17,
     attributionControl: { compact: true },
     pitchWithRotate: false,
-    dragRotate: false
+    dragRotate: false,
   });
 
   _map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
 
   return new Promise((resolve, reject) => {
-    _map.on('load', () => {
-      addRouteLayer();
-      resolve(_map);
-    });
+    _map.on('load', () => { addRouteLayers(); resolve(_map); });
     _map.on('error', e => {
-      /* Basemap tile errors are non-fatal (file might not exist yet) */
       if (!e.error?.message?.includes('pmtiles')) reject(e.error);
     });
   });
 }
 
 /* ── Route layers ────────────────────────────────────────────────────────── */
-function addRouteLayer() {
+function addRouteLayers() {
   if (!_map) return;
-
   for (const [dayId, coords] of Object.entries(DAY_ROUTES)) {
-    const sourceId = `route-${dayId}`;
-    _map.addSource(sourceId, {
+    const src = `route-${dayId}`;
+    _map.addSource(src, {
       type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: { dayId },
-        geometry: { type: 'LineString', coordinates: coords }
-      }
+      data: { type: 'Feature', properties: { dayId }, geometry: { type: 'LineString', coordinates: coords } }
     });
 
-    /* Casing */
+    /* White casing */
     _map.addLayer({
-      id: `${sourceId}-case`,
-      type: 'line',
-      source: sourceId,
+      id: `${src}-case`, type: 'line', source: src,
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: {
-        'line-color': '#ffffff',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 4, 3.5, 12, 8],
-        'line-opacity': 0.6
-      }
+      paint: { 'line-color': '#ffffff',
+               'line-width': ['interpolate', ['linear'], ['zoom'], 4, 4, 12, 9],
+               'line-opacity': 0.55 }
     });
 
-    /* Route line */
+    /* Coloured route */
     _map.addLayer({
-      id: sourceId,
-      type: 'line',
-      source: sourceId,
+      id: src, type: 'line', source: src,
       layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: {
-        'line-color': DAY_COLORS[dayId] || '#888',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 4, 2, 12, 5],
-        'line-opacity': 0.9
-      }
+      paint: { 'line-color': DAY_COLORS[dayId] || '#888',
+               'line-width': ['interpolate', ['linear'], ['zoom'], 4, 2.5, 12, 6],
+               'line-opacity': 0.9 }
+    });
+
+    /* Wide transparent hit area so the route is easy to click/tap */
+    _map.addLayer({
+      id: `${src}-hit`, type: 'line', source: src,
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': 'transparent', 'line-width': 24, 'line-opacity': 0 }
     });
   }
 }
 
-/* Show/hide route for specific days (pass null to show all) */
+/* ── Route interactivity (call after days data is loaded) ────────────────── */
+export function setupRouteClicks(days) {
+  if (!_map) return;
+  const dayMap = Object.fromEntries(days.map(d => [d.id, d]));
+
+  for (const dayId of Object.keys(DAY_ROUTES)) {
+    const src    = `route-${dayId}`;
+    const hitId  = `${src}-hit`;
+    const color  = DAY_COLORS[dayId] || '#888';
+
+    const showPopup = (e) => {
+      const day = dayMap[dayId];
+      if (!day) return;
+
+      const dateStr = day.date
+        ? new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+        : '';
+      const stats = [
+        day.driveTime     ? `🕐 ${day.driveTime}`        : null,
+        day.distanceMiles ? `📍 ${day.distanceMiles} mi`  : null,
+      ].filter(Boolean).join('&emsp;');
+
+      new maplibregl.Popup({ closeButton: true, maxWidth: '300px', className: 'route-popup' })
+        .setLngLat(e.lngLat)
+        .setHTML(`
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:2px 2px 4px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+              <span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>
+              <strong style="font-size:.95rem;color:#1a1a1a">${esc(day.title || dayId)}</strong>
+            </div>
+            ${dateStr ? `<div style="font-size:.78rem;color:#888;margin-bottom:4px">${esc(dateStr)}</div>` : ''}
+            ${stats    ? `<div style="font-size:.82rem;margin-bottom:6px">${stats}</div>` : ''}
+            ${day.fromTo ? `<div style="font-size:.82rem;color:#555;margin-bottom:5px">📌 ${esc(day.fromTo)}</div>` : ''}
+            ${day.summary ? `<div style="font-size:.82rem;color:#444;line-height:1.45;max-width:260px">${esc(day.summary)}</div>` : ''}
+          </div>
+        `)
+        .addTo(_map);
+    };
+
+    _map.on('click', src,   showPopup);
+    _map.on('click', hitId, showPopup);
+
+    /* Pointer cursor on hover — on desktop */
+    for (const id of [src, hitId]) {
+      _map.on('mouseenter', id, () => { _map.getCanvas().style.cursor = 'pointer'; });
+      _map.on('mouseleave', id, () => { _map.getCanvas().style.cursor = '';        });
+    }
+  }
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Route visibility toggle ─────────────────────────────────────────────── */
 export function setRouteVisibility(dayIds) {
   if (!_map) return;
   for (const dayId of Object.keys(DAY_ROUTES)) {
     const vis = (!dayIds || dayIds.includes(dayId)) ? 'visible' : 'none';
-    if (_map.getLayer(`route-${dayId}`))      _map.setLayoutProperty(`route-${dayId}`,      'visibility', vis);
-    if (_map.getLayer(`route-${dayId}-case`)) _map.setLayoutProperty(`route-${dayId}-case`, 'visibility', vis);
+    for (const suffix of ['', '-case', '-hit']) {
+      const id = `route-${dayId}${suffix}`;
+      if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', vis);
+    }
   }
 }
 
-/* Fly to a place */
+/* ── Camera helpers ──────────────────────────────────────────────────────── */
 export function flyToPlace(lat, lng, zoom = 13) {
   if (!_map) return;
   _map.flyTo({ center: [lng, lat], zoom, speed: 1.4 });
 }
 
-/* Fit to a day's route bbox */
 export function fitToDay(dayId) {
   if (!_map || !DAY_ROUTES[dayId]) return;
   const coords = DAY_ROUTES[dayId];
@@ -273,7 +451,6 @@ export function fitToDay(dayId) {
   );
 }
 
-/* Fit entire trip */
 export function fitTrip() {
   if (!_map) return;
   _map.fitBounds([[-111.2, 39.6], [-104.4, 45.1]], {
