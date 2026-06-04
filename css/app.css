@@ -158,6 +158,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   transition: background .15s, transform .1s;
 }
 .map-btn:active { transform: scale(.92); }
+.map-btn.active { background: var(--green-mid); color: #fff; box-shadow: 0 2px 8px rgba(45,90,39,.4); }
 
 /* Filter chips */
 #filter-bar {

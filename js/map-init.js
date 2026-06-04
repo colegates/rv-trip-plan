@@ -82,6 +82,29 @@ export const DAY_ROUTES = {
   ],
 };
 
+/* Vector fill/road layer IDs to hide when satellite is active */
+const SAT_HIDE_LAYERS = [
+  'background', 'earth', 'water', 'natural',
+  'landuse-park', 'landuse-urban',
+  'roads-minor', 'roads-secondary', 'roads-major-case', 'roads-major',
+  'roads-hw-case', 'roads-highway', 'waterway',
+];
+
+let _satelliteMode = false;
+
+export function toggleSatellite() {
+  if (!_map) return false;
+  _satelliteMode = !_satelliteMode;
+  const satVis = _satelliteMode ? 'visible' : 'none';
+  const vecVis = _satelliteMode ? 'none'    : 'visible';
+  if (_map.getLayer('satellite-tiles'))
+    _map.setLayoutProperty('satellite-tiles', 'visibility', satVis);
+  for (const id of SAT_HIDE_LAYERS) {
+    if (_map.getLayer(id)) _map.setLayoutProperty(id, 'visibility', vecVis);
+  }
+  return _satelliteMode;
+}
+
 function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
   return {
     version: 8,
@@ -92,9 +115,23 @@ function buildMapStyle(pmtilesAbsoluteUrl, glyphsBase) {
         type: 'vector',
         url: `pmtiles://${pmtilesAbsoluteUrl}`,
         attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> · © <a href="https://protomaps.com" target="_blank">Protomaps</a>'
+      },
+      'esri-satellite': {
+        type: 'raster',
+        /* Esri World Imagery — free, no API key required for personal use.
+           Tiles are cached by the service worker as you browse (cache-as-you-go). */
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© <a href="https://www.esri.com" target="_blank">Esri</a>, Maxar, Earthstar Geographics',
       }
     },
     layers: [
+      /* Satellite raster — below everything, hidden by default */
+      { id: 'satellite-tiles', type: 'raster', source: 'esri-satellite',
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 1 } },
+
       { id: 'background', type: 'background', paint: { 'background-color': '#f5efe0' } },
 
       /* Land */
