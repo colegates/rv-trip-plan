@@ -2,7 +2,7 @@
    Cache version: bump CACHE_VERSION to force a full refresh on all clients.
 */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
 
 /* Satellite tile cache — kept separate so it survives main cache version bumps */
@@ -132,16 +132,29 @@ function notifyProgress(progress, status) {
   });
 }
 
-/* ── Activate — delete old caches ────────────────────────────────────────── */
+/* ── Activate — migrate PMTiles then delete old caches ───────────────────── */
 self.addEventListener('activate', event => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(
-        /* Preserve satellite cache across main version bumps */
-        keys.filter(k => k.startsWith('rv-trip-') && k !== CACHE_NAME && k !== SAT_CACHE)
-            .map(k => caches.delete(k))
-      );
+      const oldNames = keys.filter(k => k.startsWith('rv-trip-') && k !== CACHE_NAME && k !== SAT_CACHE);
+
+      /* Migrate basemap.pmtiles from the most recent old cache so users don't
+         have to re-download the large file on every version bump. */
+      const newCache = await caches.open(CACHE_NAME);
+      const alreadyHasPmtiles = await newCache.match(PMTILES_URL);
+      if (!alreadyHasPmtiles) {
+        for (const oldName of oldNames) {
+          const old = await caches.open(oldName);
+          const pmRes = await old.match(PMTILES_URL);
+          if (pmRes) {
+            await newCache.put(PMTILES_URL, pmRes);
+            break;
+          }
+        }
+      }
+
+      await Promise.all(oldNames.map(k => caches.delete(k)));
       await self.clients.claim();
     })()
   );
