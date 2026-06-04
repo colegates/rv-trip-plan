@@ -26,6 +26,10 @@ const PRECACHE_URLS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './glyphs/Noto Sans Regular/0-255.pbf',
+  './glyphs/Noto Sans Regular/256-511.pbf',
+  './glyphs/Noto Sans Bold/0-255.pbf',
+  './glyphs/Noto Sans Bold/256-511.pbf',
 ];
 
 /* PMTiles basemap — large file, handled separately with range-request caching */

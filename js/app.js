@@ -1,7 +1,7 @@
 /* Main app orchestrator */
 
 import { openDB, isEmpty, replaceAll, getTripMeta, getAllDays, getAllPlaces, getStorageEstimate } from './db.js';
-import { initMap, fitTrip, flyToPlace } from './map-init.js';
+import { initMap, fitTrip, flyToPlace, setupRouteClicks } from './map-init.js';
 import { renderMarkers, toggleFilter, getActiveFilters, closeBottomSheet, updateGpsMarker, renderDayLegend } from './markers.js';
 import { initItinerary, updateItinerary } from './ui-itinerary.js';
 import { initImport } from './ui-import.js';
@@ -179,6 +179,7 @@ async function boot() {
   setLoadingStatus('Placing markers…');
   renderMarkers(places, days);
   renderDayLegend(days);
+  setupRouteClicks(days);
   fitTrip();
   setLoadingProgress(85);
 
