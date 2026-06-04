@@ -6,6 +6,7 @@ import { renderMarkers, toggleFilter, getActiveFilters, closeBottomSheet, update
 import { initItinerary, updateItinerary } from './ui-itinerary.js';
 import { initImport } from './ui-import.js';
 import { startWatching, onPositionUpdate } from './gps.js';
+import { tilesAlreadyCached, preCacheMapTiles, countTiles, resetTileCache } from './tile-precache.js';
 
 /* ── Toast ──────────────────────────────────────────────────────────────── */
 let _toastTimer = null;
@@ -111,6 +112,52 @@ async function updateInfoPanel() {
     const bookingEl = document.getElementById('trip-booking-meta');
     if (bookingEl) bookingEl.textContent = meta.booking || '';
   }
+  updateTileCacheStatus();
+}
+
+function updateTileCacheStatus() {
+  const statusEl = document.getElementById('tile-cache-status');
+  if (!statusEl) return;
+  if (tilesAlreadyCached()) {
+    statusEl.textContent = '✅ Offline maps cached';
+    statusEl.className = 'tile-cache-status cached';
+  } else {
+    const n = countTiles().toLocaleString();
+    statusEl.textContent = `⬇️ ~${n} tiles not yet cached`;
+    statusEl.className = 'tile-cache-status not-cached';
+  }
+}
+
+let _precaching = false;
+
+async function startManualPrecache() {
+  if (_precaching) return;
+  _precaching = true;
+
+  const btn = document.getElementById('tile-cache-btn');
+  const bar = document.getElementById('tile-cache-bar');
+  const fill = document.getElementById('tile-cache-fill');
+  const statusEl = document.getElementById('tile-cache-status');
+
+  if (btn) btn.disabled = true;
+  if (bar) bar.style.display = 'block';
+
+  showToast('📥 Downloading offline maps… this may take a few minutes', 8000);
+
+  try {
+    await preCacheMapTiles((pct, done, total, sourceId) => {
+      if (fill) fill.style.width = `${pct}%`;
+      if (statusEl) statusEl.textContent = `📥 ${pct}% — caching ${sourceId} tiles…`;
+    });
+    updateTileCacheStatus();
+    if (bar) bar.style.display = 'none';
+    showToast('✅ All offline maps saved!', 4000);
+  } catch (e) {
+    showToast('⚠️ Map caching failed — try again online', 4000);
+  }
+
+  if (btn) btn.disabled = false;
+  _precaching = false;
 }
 
 /* ── Filter chips ───────────────────────────────────────────────────────── */
@@ -218,6 +265,14 @@ async function boot() {
   /* Fit-trip button */
   document.getElementById('fit-btn')?.addEventListener('click', fitTrip);
 
+  /* Offline maps cache button */
+  document.getElementById('tile-cache-btn')?.addEventListener('click', startManualPrecache);
+  document.getElementById('tile-cache-reset-btn')?.addEventListener('click', () => {
+    resetTileCache();
+    updateTileCacheStatus();
+    showToast('🗑️ Cache flag cleared — tap Download to re-cache');
+  });
+
   /* Locate-me button */
   document.getElementById('locate-btn')?.addEventListener('click', () => {
     if (navigator.geolocation) {
@@ -239,6 +294,11 @@ async function boot() {
   /* Show app */
   setLoadingStatus('Ready!');
   setTimeout(hideLoading, 300);
+
+  /* Auto-precache map tiles on first open (runs in background after UI shown) */
+  if (!tilesAlreadyCached() && navigator.onLine) {
+    setTimeout(() => startManualPrecache(), 3000);
+  }
 }
 
 /* ── Start ─────────────────────────────────────────────────────────────── */
