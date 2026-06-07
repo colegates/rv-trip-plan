@@ -770,6 +770,178 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .route-popup .popup-stat { font-size: .85rem; margin: 2px 0; }
 .route-popup .popup-summary { font-size: .82rem; color: var(--text-muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.45; }
 
+/* ─── Day filter bar ────────────────────────────────────────────────────── */
+#day-filter-bar {
+  position: absolute;
+  top: 44px; /* below filter-bar */
+  left: 0;
+  right: 0;
+  padding: 5px 10px;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  z-index: 10;
+  -webkit-overflow-scrolling: touch;
+}
+#day-filter-bar::-webkit-scrollbar { display: none; }
+
+.day-chip {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  background: rgba(255,255,255,.82);
+  color: var(--text-primary);
+  border: 1.5px solid transparent;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+.day-chip.active {
+  background: var(--green-dark);
+  color: #fff;
+  border-color: var(--green-mid);
+}
+
+/* ─── Map marker day badge ──────────────────────────────────────────────── */
+.day-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Nudge legend down to clear day-filter-bar */
+#day-legend { top: 86px; }
+
+/* ─── Itinerary sections ────────────────────────────────────────────────── */
+.itin-section {
+  margin-bottom: 12px;
+}
+.itin-section:last-of-type { margin-bottom: 0; }
+
+.itin-section-title {
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+/* Drive table */
+.itin-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.itin-drive-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .76rem;
+}
+.itin-drive-table th {
+  background: var(--surface-alt);
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.itin-drive-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.itin-drive-table tr:last-child td { border-bottom: none; }
+.itin-td-center { text-align: center; }
+.itin-td-right  { text-align: right; }
+
+/* Schedule / plan */
+.itin-sched-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .84rem;
+}
+.itin-sched-row:last-child { border-bottom: none; }
+
+.itin-sched-time {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 46px;
+}
+.itin-sched-time--empty { min-width: 46px; }
+.itin-sched-text { flex: 1; line-height: 1.45; color: var(--text-primary); }
+
+/* Staying card */
+.itin-stay-card {
+  background: var(--surface-alt);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+
+.itin-stay-name {
+  font-size: .92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 4px;
+}
+.itin-stay-link {
+  color: var(--sky);
+  text-decoration: none;
+}
+.itin-stay-link:active { opacity: .7; }
+
+.itin-stay-phone {
+  display: block;
+  font-size: .82rem;
+  color: var(--sky);
+  text-decoration: none;
+  margin-bottom: 3px;
+}
+.itin-stay-phone:active { opacity: .7; }
+
+.itin-stay-detail {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.itin-stay-notes {
+  font-size: .8rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.itin-stay-flyout .itin-stay-name { color: var(--green-dark); }
+
+/* Chips section */
+.itin-chips-section { margin-bottom: 10px; }
+
 /* ─── Utility ───────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }

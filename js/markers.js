@@ -21,17 +21,22 @@ const KIND_EMOJI = {
 
 /* Active filters — set of category names that are ON; campground/stop always on */
 const _activeFilters = new Set(['Sights', 'Wildlife', 'History', 'Food/Brewery', 'Outdoors', 'Fuel/Services', 'Lodging', 'campground', 'stop']);
-let _markers = [];   // { marker, place, el }
-let _currentDayFilter = null;   // null = all days
+let _markers = [];           // { marker, place, el }
+let _currentDayFilter = null;  // null = all days
+let _showOptional = false;     // POIs with no dayIds hidden by default
 
 /* ── Marker element factory ──────────────────────────────────────────────── */
-function makeMarkerEl(place) {
+function makeMarkerEl(place, days) {
   /* MapLibre adds class .maplibregl-marker { position:absolute; top:0; left:0 }
      to whatever element we pass in.  Don't set position inline — it would
      override that CSS and break transform-based positioning entirely. */
   const wrapper = document.createElement('div');
   wrapper.className = 'map-marker';
-  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer';
+  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer;position:relative';
+
+  const dayIds = Array.isArray(place.dayIds) ? place.dayIds : [];
+  const primaryDay = dayIds[0] || null;
+  const dayColor = primaryDay ? (DAY_COLORS[primaryDay] || '#888') : null;
 
   const inner = document.createElement('div');
   inner.style.cssText = [
@@ -46,11 +51,11 @@ function makeMarkerEl(place) {
 
   let bg, text;
   if (place.kind === 'campground') {
-    bg = '#2d5a27'; text = '🏕️';
+    bg = dayColor || '#2d5a27'; text = '🏕️';
   } else if (place.kind === 'stop') {
-    bg = '#8b5e3c'; text = '📍';
+    bg = dayColor || '#8b5e3c'; text = '📍';
   } else {
-    bg = '#3a5a8c';
+    bg = dayColor || '#3a5a8c';
     text = CATEGORY_EMOJI[place.category] || '⭐';
   }
 
@@ -67,6 +72,20 @@ function makeMarkerEl(place) {
   });
 
   wrapper.appendChild(inner);
+
+  /* Day badge — shows day number(s), e.g. "1" or "1·5" for multi-day */
+  if (dayIds.length > 0) {
+    const badge = document.createElement('div');
+    badge.className = 'day-badge';
+    const nums = dayIds.map(id => {
+      const d = days ? days.find(x => x.id === id) : null;
+      return d ? String(d.order) : id.replace('day', '');
+    });
+    badge.textContent = nums.slice(0, 2).join('·');
+    badge.style.background = dayColor || '#888';
+    wrapper.appendChild(badge);
+  }
+
   return wrapper;
 }
 
@@ -85,7 +104,7 @@ export function renderMarkers(places, days) {
   for (const place of places) {
     if (typeof place.lat !== 'number' || typeof place.lng !== 'number') continue;
 
-    const el = makeMarkerEl(place);
+    const el = makeMarkerEl(place, days);
     const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
       .setLngLat([place.lng, place.lat])
       .addTo(map);
@@ -110,8 +129,18 @@ export function toggleFilter(category) {
 
 export function setDayFilter(dayId) {
   _currentDayFilter = dayId;
+  if (dayId) setRouteVisibility([dayId]);
+  else setRouteVisibility(null);
   applyFilters();
 }
+
+export function toggleOptionalStops() {
+  _showOptional = !_showOptional;
+  applyFilters();
+  return _showOptional;
+}
+
+export function isOptionalStopsVisible() { return _showOptional; }
 
 function applyFilters() {
   for (const m of _markers) {
@@ -123,9 +152,16 @@ function applyFilters() {
     else if (p.kind === 'stop'  && !_activeFilters.has('stop'))       show = false;
     else if (p.kind === 'poi'   && !_activeFilters.has(p.category))   show = false;
 
+    /* Optional stops (POIs with no dayIds) */
+    if (show && p.kind === 'poi') {
+      const hasScheduledDays = Array.isArray(p.dayIds) && p.dayIds.length > 0;
+      if (!hasScheduledDays && !_showOptional) show = false;
+    }
+
     /* Day filter */
-    if (show && _currentDayFilter && Array.isArray(p.dayIds)) {
-      if (!p.dayIds.includes(_currentDayFilter)) show = false;
+    if (show && _currentDayFilter) {
+      const dayIds = Array.isArray(p.dayIds) ? p.dayIds : [];
+      if (!dayIds.includes(_currentDayFilter)) show = false;
     }
 
     m.el.style.display = show ? '' : 'none';
@@ -217,6 +253,17 @@ function renderBsActions(place) {
     const display = place.phone.replace(/^\+1/, '').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     telBtn.innerHTML = `<span class="action-icon">📞</span> ${display}`;
     container.appendChild(telBtn);
+  }
+
+  /* Website */
+  if (place.website && place.website.startsWith('https://')) {
+    const webBtn = document.createElement('a');
+    webBtn.className = 'action-btn btn-outline';
+    webBtn.href = place.website;
+    webBtn.target = '_blank';
+    webBtn.rel = 'noopener';
+    webBtn.innerHTML = '<span class="action-icon">🌐</span> Website';
+    container.appendChild(webBtn);
   }
 }
 

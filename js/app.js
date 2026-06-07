@@ -2,7 +2,7 @@
 
 import { openDB, isEmpty, replaceAll, getTripMeta, getAllDays, getAllPlaces, getStorageEstimate } from './db.js';
 import { initMap, fitTrip, flyToPlace, setupRouteClicks, toggleSatellite } from './map-init.js';
-import { renderMarkers, toggleFilter, getActiveFilters, closeBottomSheet, updateGpsMarker, renderDayLegend } from './markers.js';
+import { renderMarkers, toggleFilter, getActiveFilters, setDayFilter, toggleOptionalStops, isOptionalStopsVisible, closeBottomSheet, updateGpsMarker, renderDayLegend } from './markers.js';
 import { initItinerary, updateItinerary } from './ui-itinerary.js';
 import { initImport } from './ui-import.js';
 import { startWatching, onPositionUpdate } from './gps.js';
@@ -171,6 +171,43 @@ function initFilterChips() {
       chip.classList.toggle('active', active.has(cat));
     });
   });
+
+  /* Optional stops toggle */
+  const optChip = document.getElementById('optional-stops-chip');
+  if (optChip) {
+    optChip.addEventListener('click', () => {
+      const nowVisible = toggleOptionalStops();
+      optChip.classList.toggle('active', nowVisible);
+      optChip.setAttribute('aria-pressed', String(nowVisible));
+    });
+  }
+}
+
+/* ── Day filter bar ─────────────────────────────────────────────────────── */
+function initDayFilterUI(days) {
+  const bar = document.getElementById('day-filter-bar');
+  if (!bar) return;
+
+  /* Clear existing buttons except "All" */
+  bar.innerHTML = '<button class="day-chip active" data-day="all">All</button>';
+
+  for (const day of days) {
+    const btn = document.createElement('button');
+    btn.className = 'day-chip';
+    btn.dataset.day = day.id;
+    btn.textContent = `D${day.order || '?'}`;
+    btn.title = day.title || day.id;
+    bar.appendChild(btn);
+  }
+
+  bar.addEventListener('click', e => {
+    const btn = e.target.closest('.day-chip');
+    if (!btn) return;
+    bar.querySelectorAll('.day-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const dayId = btn.dataset.day;
+    setDayFilter(dayId === 'all' ? null : dayId);
+  });
 }
 
 /* ── Data load & refresh ────────────────────────────────────────────────── */
@@ -226,6 +263,7 @@ async function boot() {
   setLoadingStatus('Placing markers…');
   renderMarkers(places, days);
   renderDayLegend(days);
+  initDayFilterUI(days);
   setupRouteClicks(days);
   fitTrip();
   setLoadingProgress(85);
