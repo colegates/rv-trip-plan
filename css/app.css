@@ -770,6 +770,67 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .route-popup .popup-stat { font-size: .85rem; margin: 2px 0; }
 .route-popup .popup-summary { font-size: .82rem; color: var(--text-muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.45; }
 
+/* ─── Navigation button row (Maps / Google / Waze) ─────────────────────── */
+.nav-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: var(--surface-alt);
+  border: 1.5px solid var(--border);
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: .72rem;
+  font-weight: 600;
+  transition: background .15s;
+}
+.nav-btn:active { background: var(--green-pale); }
+.nav-btn-icon { font-size: 1.35rem; line-height: 1; }
+.nav-btn-label { white-space: nowrap; }
+
+/* ─── Itinerary stay card action links ──────────────────────────────────── */
+.itin-stay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.itin-stay-website,
+.itin-stay-phone,
+.itin-stay-waze,
+.itin-stay-maps {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: background .12s;
+}
+.itin-stay-phone  { color: #2a6a2a; background: #f0f8f0; border-color: #b8d8b8; }
+.itin-stay-website { color: var(--sky); background: var(--sky-pale); border-color: #a0cce0; }
+.itin-stay-waze   { color: #4a3a80; background: #eeeaf8; border-color: #bdb0e0; }
+.itin-stay-maps   { color: #1a4a8a; background: #e8f0f8; border-color: #a0b8d8; }
+.itin-stay-website:active,
+.itin-stay-phone:active,
+.itin-stay-waze:active,
+.itin-stay-maps:active { opacity: .75; }
+
 /* ─── Day filter bar ────────────────────────────────────────────────────── */
 #day-filter-bar {
   position: absolute;

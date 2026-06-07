@@ -141,12 +141,15 @@ function buildDayBody(body, day, places, campByDay, dayMap) {
         <div class="itin-stay-detail">Road Bear depot by 10:30 AM &middot; Fly 14:05 to Orlando</div>
       </div>`;
   } else if (camp) {
-    const nameHtml = camp.website
-      ? `<a class="itin-stay-name itin-stay-link" href="${esc(camp.website)}" target="_blank" rel="noopener">${esc(camp.name)}</a>`
-      : `<div class="itin-stay-name">${esc(camp.name)}</div>`;
-    const phoneHtml = camp.phone
-      ? `<a class="itin-stay-detail itin-stay-phone" href="tel:${esc(camp.phone)}">${formatPhone(camp.phone)}</a>`
+    const nameHtml = `<div class="itin-stay-name">${esc(camp.name)}</div>`;
+    const websiteHtml = camp.website && camp.website.startsWith('https://')
+      ? `<a class="itin-stay-website" href="${camp.website}" target="_blank" rel="noopener">🌐 Visit website ↗</a>`
       : '';
+    const phoneHtml = camp.phone
+      ? `<a class="itin-stay-phone" href="tel:${esc(camp.phone)}">📞 ${formatPhone(camp.phone)}</a>`
+      : '';
+    const wazeHtml = `<a class="itin-stay-waze" href="waze://?ll=${camp.lat},${camp.lng}&navigate=yes" onclick="setTimeout(()=>window.open('https://waze.com/ul?ll=${camp.lat},${camp.lng}&navigate=yes','_blank'),1500);window.location.href=this.href;return false;">🔷 Waze directions</a>`;
+    const mapsHtml = `<a class="itin-stay-maps" href="https://www.google.com/maps/dir/?api=1&destination=${camp.lat},${camp.lng}" target="_blank" rel="noopener">🗺️ Google Maps</a>`;
     const addrHtml = camp.address
       ? `<div class="itin-stay-detail">${esc(camp.address)}</div>`
       : '';
@@ -157,9 +160,14 @@ function buildDayBody(body, day, places, campByDay, dayMap) {
       <div class="itin-section-title">Where you're staying</div>
       <div class="itin-stay-card">
         ${nameHtml}
-        ${phoneHtml}
         ${addrHtml}
         ${notesHtml}
+        <div class="itin-stay-actions">
+          ${phoneHtml}
+          ${websiteHtml}
+          ${wazeHtml}
+          ${mapsHtml}
+        </div>
       </div>`;
   } else {
     staySection.style.display = 'none';
