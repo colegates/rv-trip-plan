@@ -41,8 +41,11 @@ function makeMarkerEl(place, days) {
   const primaryDay = dayIds[0] || null;
   const dayColor = primaryDay ? (DAY_COLORS[primaryDay] || '#888') : null;
 
+  /* inner has position:relative so the day badge can be absolutely positioned
+     relative to it — keeping the wrapper itself clean for MapLibre's transform. */
   const inner = document.createElement('div');
   inner.style.cssText = [
+    'position:relative',
     'width:32px', 'height:32px',
     'display:flex', 'align-items:center', 'justify-content:center',
     'border-radius:50%', 'border:2px solid rgba(255,255,255,.85)',
@@ -74,9 +77,8 @@ function makeMarkerEl(place, days) {
     inner.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
   });
 
-  wrapper.appendChild(inner);
-
-  /* Day badge — shows day number(s), e.g. "1" or "1·5" for multi-day */
+  /* Day badge lives inside inner (not the wrapper) so it never overflows the
+     wrapper's bounding rect — which MapLibre measures for the anchor offset. */
   if (dayIds.length > 0) {
     const badge = document.createElement('div');
     badge.className = 'day-badge';
@@ -86,8 +88,10 @@ function makeMarkerEl(place, days) {
     });
     badge.textContent = nums.slice(0, 2).join('·');
     badge.style.background = dayColor || '#888';
-    wrapper.appendChild(badge);
+    inner.appendChild(badge);   // inside inner, NOT wrapper
   }
+
+  wrapper.appendChild(inner);
 
   return wrapper;
 }
@@ -229,43 +233,26 @@ function renderBsActions(place) {
   etaBtn.addEventListener('click', handleEta);
   container.appendChild(etaBtn);
 
-  /* Navigation buttons row */
-  const appleUrl  = `maps://?daddr=${place.lat},${place.lng}`;
+  /* Navigation row — Google Maps + Waze only */
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
-  const wazeUrl   = `waze://?ll=${place.lat},${place.lng}&navigate=yes`;
-  const wazeWebUrl = `https://waze.com/ul?ll=${place.lat},${place.lng}&navigate=yes`;
+  const wazeUrl   = `https://waze.com/ul?ll=${place.lat},${place.lng}&navigate=yes`;
 
   const navRow = document.createElement('div');
   navRow.className = 'nav-btn-row';
-
-  const mapsBtn = document.createElement('a');
-  mapsBtn.className = 'nav-btn';
-  mapsBtn.href = appleUrl;
-  mapsBtn.title = 'Open in Apple Maps';
-  mapsBtn.innerHTML = '<span class="nav-btn-icon">🗺️</span><span class="nav-btn-label">Maps</span>';
-  navRow.appendChild(mapsBtn);
 
   const gBtn = document.createElement('a');
   gBtn.className = 'nav-btn';
   gBtn.href = googleUrl;
   gBtn.target = '_blank';
   gBtn.rel = 'noopener';
-  gBtn.title = 'Open in Google Maps';
-  gBtn.innerHTML = '<span class="nav-btn-icon">🔵</span><span class="nav-btn-label">Google</span>';
+  gBtn.innerHTML = '<span class="nav-btn-icon">🗺️</span><span class="nav-btn-label">Google Maps</span>';
   navRow.appendChild(gBtn);
 
-  /* Waze — try the app deep-link; if it doesn't open the OS will fall back */
   const wazeBtn = document.createElement('a');
   wazeBtn.className = 'nav-btn';
   wazeBtn.href = wazeUrl;
-  wazeBtn.title = 'Open in Waze';
-  /* On desktop / if Waze isn't installed, fall through to web */
-  wazeBtn.addEventListener('click', e => {
-    e.preventDefault();
-    const t = setTimeout(() => { window.open(wazeWebUrl, '_blank'); }, 1500);
-    window.location.href = wazeUrl;
-    window.addEventListener('blur', () => clearTimeout(t), { once: true });
-  });
+  wazeBtn.target = '_blank';
+  wazeBtn.rel = 'noopener';
   wazeBtn.innerHTML = '<span class="nav-btn-icon">🔷</span><span class="nav-btn-label">Waze</span>';
   navRow.appendChild(wazeBtn);
 
@@ -353,20 +340,39 @@ export function updateGpsMarker(lat, lng) {
 }
 
 /* ── Day legend ──────────────────────────────────────────────────────────── */
-const _hiddenDays = new Set();   /* day IDs whose routes are currently hidden */
+const _hiddenDays = new Set();
 
 export function renderDayLegend(days) {
   const legend = document.getElementById('day-legend');
   legend.innerHTML = '';
 
+  /* Collapsible header */
+  const header = document.createElement('button');
+  header.className = 'legend-header';
+  header.innerHTML = '<span class="legend-header-label">Routes</span><span class="legend-header-arrow">▲</span>';
+  legend.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'legend-body';
+  legend.appendChild(body);
+
+  let collapsed = false;
+  header.addEventListener('click', () => {
+    collapsed = !collapsed;
+    body.classList.toggle('legend-body--collapsed', collapsed);
+    header.querySelector('.legend-header-arrow').textContent = collapsed ? '▼' : '▲';
+  });
+
   for (const day of days) {
-    const color = DAY_COLORS[day.id] || '#888';
+    const color  = DAY_COLORS[day.id] || '#888';
+    const dayNum = day.order ? `D${day.order}` : day.id.replace('day', 'D');
     const row = document.createElement('div');
     row.className = 'legend-row legend-toggle';
     if (_hiddenDays.has(day.id)) row.classList.add('legend-off');
     row.innerHTML = `<span class="legend-swatch" style="background:${color}"></span>
+                     <span class="legend-daynum" style="color:${color}">${dayNum}</span>
                      <span class="legend-label">${day.title || day.id}</span>
-                     <span class="legend-eye">${_hiddenDays.has(day.id) ? '👁️‍🗨️' : '👁️'}</span>`;
+                     <span class="legend-eye">${_hiddenDays.has(day.id) ? '🙈' : '👁️'}</span>`;
 
     row.addEventListener('click', () => {
       const isHidden = _hiddenDays.has(day.id);
@@ -377,14 +383,13 @@ export function renderDayLegend(days) {
       } else {
         _hiddenDays.add(day.id);
         row.classList.add('legend-off');
-        row.querySelector('.legend-eye').textContent = '👁️‍🗨️';
+        row.querySelector('.legend-eye').textContent = '🙈';
       }
-      /* Show all days that are NOT hidden */
       const visible = days.map(d => d.id).filter(id => !_hiddenDays.has(id));
       setRouteVisibility(visible);
     });
 
-    legend.appendChild(row);
+    body.appendChild(row);
   }
   legend.classList.add('visible');
 }
