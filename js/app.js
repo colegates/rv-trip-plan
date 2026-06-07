@@ -228,16 +228,22 @@ async function boot() {
   await registerSW();
   await openDB();
 
-  /* Seed IndexedDB from trip.json if empty */
-  if (await isEmpty()) {
-    setLoadingStatus('Loading trip data…');
-    try {
-      const res  = await fetch('./trip.json');
-      const doc  = await res.json();
+  /* Seed IndexedDB from trip.json if empty OR if the bundled data has changed.
+     The trip.json label is stored in localStorage so we can detect updates
+     without requiring users to manually reset. */
+  const TRIP_LABEL_KEY = 'rv-trip-data-label';
+  try {
+    setLoadingStatus('Checking trip data…');
+    const res    = await fetch('./trip.json');
+    const doc    = await res.json();
+    const stored = localStorage.getItem(TRIP_LABEL_KEY);
+    if (await isEmpty() || stored !== doc.label) {
+      setLoadingStatus('Loading updated trip data…');
       await replaceAll(doc.trip, doc.days || [], doc.places || []);
-    } catch (e) {
-      console.error('Failed to seed from trip.json:', e);
+      localStorage.setItem(TRIP_LABEL_KEY, doc.label || '');
     }
+  } catch (e) {
+    console.error('Failed to seed from trip.json:', e);
   }
 
   /* Online/offline status */
