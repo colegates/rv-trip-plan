@@ -301,21 +301,51 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   position: absolute;
   top: 48px;
   left: 8px;
-  background: rgba(255,255,255,.92);
-  border-radius: 8px;
-  padding: 6px 10px;
+  background: rgba(255,255,255,.94);
+  border-radius: 10px;
   font-size: .72rem;
   font-weight: 600;
   z-index: 10;
   box-shadow: var(--shadow);
   display: none;
+  min-width: 180px;
+  overflow: hidden;
 }
 #day-legend.visible { display: block; }
-.legend-row { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 5px; }
-.legend-swatch { width: 24px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 10px 6px;
+  background: var(--green-dark);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+}
+.legend-header:active { opacity: .85; }
+.legend-header-arrow { font-size: .65rem; margin-left: 6px; }
+
+.legend-body { padding: 4px 0; }
+.legend-body--collapsed { display: none; }
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+}
+.legend-swatch { width: 20px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+.legend-daynum { font-size: .7rem; font-weight: 800; flex-shrink: 0; min-width: 22px; }
 .legend-toggle { cursor: pointer; user-select: none; transition: opacity .2s, background .15s; }
-.legend-toggle:hover { background: rgba(0,0,0,.06); }
-.legend-label { flex: 1; }
+.legend-toggle:hover { background: rgba(0,0,0,.05); }
+.legend-label { flex: 1; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
 .legend-eye { font-size: .75rem; opacity: .6; flex-shrink: 0; }
 .legend-off { opacity: .35; }
 .legend-off .legend-swatch { opacity: .25; }
@@ -831,40 +861,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .itin-stay-waze:active,
 .itin-stay-maps:active { opacity: .75; }
 
-/* ─── Day filter bar ────────────────────────────────────────────────────── */
-#day-filter-bar {
-  position: absolute;
-  top: 44px; /* below filter-bar */
-  left: 0;
-  right: 0;
-  padding: 5px 10px;
-  display: flex;
-  gap: 5px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  z-index: 10;
-  -webkit-overflow-scrolling: touch;
-}
-#day-filter-bar::-webkit-scrollbar { display: none; }
-
-.day-chip {
-  flex-shrink: 0;
-  padding: 4px 11px;
-  border-radius: 999px;
-  font-size: .75rem;
-  font-weight: 700;
-  background: rgba(255,255,255,.82);
-  color: var(--text-primary);
-  border: 1.5px solid transparent;
-  transition: background .15s, border-color .15s, color .15s;
-  white-space: nowrap;
-}
-.day-chip.active {
-  background: var(--green-dark);
-  color: #fff;
-  border-color: var(--green-mid);
-}
-
 /* ─── Map marker day badge ──────────────────────────────────────────────── */
 /* Badge is inside .inner (position:relative), NOT inside the wrapper that
    MapLibre transforms — this prevents the badge's overflow from affecting
@@ -887,9 +883,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   pointer-events: none;
   z-index: 1;
 }
-
-/* Nudge legend down to clear day-filter-bar */
-#day-legend { top: 86px; }
 
 /* ─── Itinerary sections ────────────────────────────────────────────────── */
 .itin-section {
