@@ -866,10 +866,13 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 
 /* ─── Map marker day badge ──────────────────────────────────────────────── */
+/* Badge is inside .inner (position:relative), NOT inside the wrapper that
+   MapLibre transforms — this prevents the badge's overflow from affecting
+   the wrapper's getBoundingClientRect used for anchor-offset computation. */
 .day-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -5px;
+  right: -5px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -882,6 +885,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   color: #fff;
   line-height: 1;
   pointer-events: none;
+  z-index: 1;
 }
 
 /* Nudge legend down to clear day-filter-bar */

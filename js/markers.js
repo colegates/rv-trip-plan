@@ -41,8 +41,11 @@ function makeMarkerEl(place, days) {
   const primaryDay = dayIds[0] || null;
   const dayColor = primaryDay ? (DAY_COLORS[primaryDay] || '#888') : null;
 
+  /* inner has position:relative so the day badge can be absolutely positioned
+     relative to it — keeping the wrapper itself clean for MapLibre's transform. */
   const inner = document.createElement('div');
   inner.style.cssText = [
+    'position:relative',
     'width:32px', 'height:32px',
     'display:flex', 'align-items:center', 'justify-content:center',
     'border-radius:50%', 'border:2px solid rgba(255,255,255,.85)',
@@ -74,9 +77,8 @@ function makeMarkerEl(place, days) {
     inner.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
   });
 
-  wrapper.appendChild(inner);
-
-  /* Day badge — shows day number(s), e.g. "1" or "1·5" for multi-day */
+  /* Day badge lives inside inner (not the wrapper) so it never overflows the
+     wrapper's bounding rect — which MapLibre measures for the anchor offset. */
   if (dayIds.length > 0) {
     const badge = document.createElement('div');
     badge.className = 'day-badge';
@@ -86,8 +88,10 @@ function makeMarkerEl(place, days) {
     });
     badge.textContent = nums.slice(0, 2).join('·');
     badge.style.background = dayColor || '#888';
-    wrapper.appendChild(badge);
+    inner.appendChild(badge);   // inside inner, NOT wrapper
   }
+
+  wrapper.appendChild(inner);
 
   return wrapper;
 }
