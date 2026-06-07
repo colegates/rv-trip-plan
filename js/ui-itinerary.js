@@ -148,7 +148,7 @@ function buildDayBody(body, day, places, campByDay, dayMap) {
     const phoneHtml = camp.phone
       ? `<a class="itin-stay-phone" href="tel:${esc(camp.phone)}">📞 ${formatPhone(camp.phone)}</a>`
       : '';
-    const wazeHtml = `<a class="itin-stay-waze" href="https://waze.com/ul?ll=${camp.lat},${camp.lng}&navigate=yes" target="_blank" rel="noopener">🔷 Waze</a>`;
+    const wazeHtml = `<a class="itin-stay-waze" href="https://waze.com/ul?ll=${camp.lat},${camp.lng}" target="_blank" rel="noopener">🔷 Waze</a>`;
     const mapsHtml = `<a class="itin-stay-maps" href="https://www.google.com/maps/dir/?api=1&destination=${camp.lat},${camp.lng}" target="_blank" rel="noopener">🗺️ Google Maps</a>`;
     const addrHtml = camp.address
       ? `<div class="itin-stay-detail">${esc(camp.address)}</div>`
