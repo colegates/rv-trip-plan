@@ -235,7 +235,7 @@ function renderBsActions(place) {
 
   /* Navigation row — Google Maps + Waze only */
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
-  const wazeUrl   = `https://waze.com/ul?ll=${place.lat},${place.lng}&navigate=yes`;
+  const wazeUrl   = `https://waze.com/ul?ll=${place.lat},${place.lng}`;
 
   const navRow = document.createElement('div');
   navRow.className = 'nav-btn-row';
