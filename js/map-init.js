@@ -264,50 +264,57 @@ async function upgradeRoutesToRoads() {
 /* ── Route interactivity (call after days data is loaded) ────────────────── */
 export function setupRouteClicks(days) {
   if (!_map) return;
-  const dayMap = Object.fromEntries(days.map(d => [d.id, d]));
+  const dayMap    = Object.fromEntries(days.map(d => [d.id, d]));
+  const dayIds    = Object.keys(DAY_ROUTES);
+  const hitLayers = dayIds.map(d => `route-${d}-hit`);
+  const lineLayers = dayIds.map(d => `route-${d}`);
+  const allLayers  = [...hitLayers, ...lineLayers];
 
-  for (const dayId of Object.keys(DAY_ROUTES)) {
-    const src    = `route-${dayId}`;
-    const hitId  = `${src}-hit`;
-    const color  = DAY_COLORS[dayId] || '#888';
+  /* Single map-level handler avoids duplicate popups on overlapping routes.
+     queryRenderedFeatures returns features in render order (topmost first);
+     we take the first hit so only one popup fires per click. */
+  _map.on('click', e => {
+    const features = _map.queryRenderedFeatures(e.point, { layers: allLayers });
+    if (!features.length) return;
 
-    const showPopup = (e) => {
-      const day = dayMap[dayId];
-      if (!day) return;
+    /* Extract dayId from the layer id, e.g. "route-day3-hit" → "day3" */
+    const layerId = features[0].layer.id;
+    const match   = layerId.match(/^route-(day\d+)/);
+    if (!match) return;
+    const dayId = match[1];
+    const day   = dayMap[dayId];
+    if (!day) return;
 
-      const dateStr = day.date
-        ? new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-        : '';
-      const stats = [
-        day.driveTime     ? `🕐 ${day.driveTime}`        : null,
-        day.distanceMiles ? `📍 ${day.distanceMiles} mi`  : null,
-      ].filter(Boolean).join('&emsp;');
+    const color   = DAY_COLORS[dayId] || '#888';
+    const dateStr = day.date
+      ? new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      : '';
+    const stats = [
+      day.driveTime     ? `🕐 ${day.driveTime}`        : null,
+      day.distanceMiles ? `📍 ${day.distanceMiles} mi`  : null,
+    ].filter(Boolean).join('&emsp;');
 
-      new maplibregl.Popup({ closeButton: true, maxWidth: '300px', className: 'route-popup' })
-        .setLngLat(e.lngLat)
-        .setHTML(`
-          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:2px 2px 4px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-              <span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>
-              <strong style="font-size:.95rem;color:#1a1a1a">${esc(day.title || dayId)}</strong>
-            </div>
-            ${dateStr ? `<div style="font-size:.78rem;color:#888;margin-bottom:4px">${esc(dateStr)}</div>` : ''}
-            ${stats    ? `<div style="font-size:.82rem;margin-bottom:6px">${stats}</div>` : ''}
-            ${day.fromTo ? `<div style="font-size:.82rem;color:#555;margin-bottom:5px">📌 ${esc(day.fromTo)}</div>` : ''}
-            ${day.summary ? `<div style="font-size:.82rem;color:#444;line-height:1.45;max-width:260px">${esc(day.summary)}</div>` : ''}
+    new maplibregl.Popup({ closeButton: true, maxWidth: '300px', className: 'route-popup' })
+      .setLngLat(e.lngLat)
+      .setHTML(`
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:2px 2px 4px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+            <span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>
+            <strong style="font-size:.95rem;color:#1a1a1a">Day ${day.order || ''}: ${esc(day.title || dayId)}</strong>
           </div>
-        `)
-        .addTo(_map);
-    };
+          ${dateStr ? `<div style="font-size:.78rem;color:#888;margin-bottom:4px">${esc(dateStr)}</div>` : ''}
+          ${stats    ? `<div style="font-size:.82rem;margin-bottom:6px">${stats}</div>` : ''}
+          ${day.fromTo ? `<div style="font-size:.82rem;color:#555;margin-bottom:5px">📌 ${esc(day.fromTo)}</div>` : ''}
+          ${day.summary ? `<div style="font-size:.82rem;color:#444;line-height:1.45;max-width:260px">${esc(day.summary)}</div>` : ''}
+        </div>
+      `)
+      .addTo(_map);
+  });
 
-    _map.on('click', src,   showPopup);
-    _map.on('click', hitId, showPopup);
-
-    /* Pointer cursor on hover — on desktop */
-    for (const id of [src, hitId]) {
-      _map.on('mouseenter', id, () => { _map.getCanvas().style.cursor = 'pointer'; });
-      _map.on('mouseleave', id, () => { _map.getCanvas().style.cursor = '';        });
-    }
+  /* Pointer cursor when hovering any route */
+  for (const id of allLayers) {
+    _map.on('mouseenter', id, () => { _map.getCanvas().style.cursor = 'pointer'; });
+    _map.on('mouseleave', id, () => { _map.getCanvas().style.cursor = '';        });
   }
 }
 

@@ -32,7 +32,10 @@ function makeMarkerEl(place, days) {
      override that CSS and break transform-based positioning entirely. */
   const wrapper = document.createElement('div');
   wrapper.className = 'map-marker';
-  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer;position:relative';
+  /* MapLibre's .maplibregl-marker class sets position:absolute — that makes it
+     a positioning parent, so child .day-badge with position:absolute works
+     relative to this wrapper without any extra inline position. */
+  wrapper.style.cssText = 'width:32px;height:32px;cursor:pointer';
 
   const dayIds = Array.isArray(place.dayIds) ? place.dayIds : [];
   const primaryDay = dayIds[0] || null;
@@ -226,24 +229,47 @@ function renderBsActions(place) {
   etaBtn.addEventListener('click', handleEta);
   container.appendChild(etaBtn);
 
-  /* Apple Maps / Google Maps */
+  /* Navigation buttons row */
   const appleUrl  = `maps://?daddr=${place.lat},${place.lng}`;
   const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  const wazeUrl   = `waze://?ll=${place.lat},${place.lng}&navigate=yes`;
+  const wazeWebUrl = `https://waze.com/ul?ll=${place.lat},${place.lng}&navigate=yes`;
+
+  const navRow = document.createElement('div');
+  navRow.className = 'nav-btn-row';
 
   const mapsBtn = document.createElement('a');
-  mapsBtn.className = 'action-btn btn-secondary';
+  mapsBtn.className = 'nav-btn';
   mapsBtn.href = appleUrl;
-  mapsBtn.innerHTML = '<span class="action-icon">🗺️</span> Open in Maps';
-  container.appendChild(mapsBtn);
+  mapsBtn.title = 'Open in Apple Maps';
+  mapsBtn.innerHTML = '<span class="nav-btn-icon">🗺️</span><span class="nav-btn-label">Maps</span>';
+  navRow.appendChild(mapsBtn);
 
-  /* Google Maps fallback (separate button) */
   const gBtn = document.createElement('a');
-  gBtn.className = 'action-btn btn-outline';
+  gBtn.className = 'nav-btn';
   gBtn.href = googleUrl;
   gBtn.target = '_blank';
   gBtn.rel = 'noopener';
-  gBtn.innerHTML = '<span class="action-icon">🌐</span> Open in Google Maps';
-  container.appendChild(gBtn);
+  gBtn.title = 'Open in Google Maps';
+  gBtn.innerHTML = '<span class="nav-btn-icon">🔵</span><span class="nav-btn-label">Google</span>';
+  navRow.appendChild(gBtn);
+
+  /* Waze — try the app deep-link; if it doesn't open the OS will fall back */
+  const wazeBtn = document.createElement('a');
+  wazeBtn.className = 'nav-btn';
+  wazeBtn.href = wazeUrl;
+  wazeBtn.title = 'Open in Waze';
+  /* On desktop / if Waze isn't installed, fall through to web */
+  wazeBtn.addEventListener('click', e => {
+    e.preventDefault();
+    const t = setTimeout(() => { window.open(wazeWebUrl, '_blank'); }, 1500);
+    window.location.href = wazeUrl;
+    window.addEventListener('blur', () => clearTimeout(t), { once: true });
+  });
+  wazeBtn.innerHTML = '<span class="nav-btn-icon">🔷</span><span class="nav-btn-label">Waze</span>';
+  navRow.appendChild(wazeBtn);
+
+  container.appendChild(navRow);
 
   /* Phone */
   if (place.phone) {
