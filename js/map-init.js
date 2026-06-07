@@ -12,8 +12,6 @@ export const DAY_ROUTES = {
     [-104.9446, 39.8324], // Road Bear depot
     [-104.9281, 39.8047], // Walmart Commerce City
     [-104.9903, 39.7392], // Denver
-    [-104.9880, 39.9519], // Thornton
-    [-105.0752, 40.5853], // Fort Collins
     [-104.8202, 41.1400], // Cheyenne
     [-105.3700, 42.0670], // Douglas
     [-106.3252, 42.8501], // Casper
@@ -26,7 +24,7 @@ export const DAY_ROUTES = {
     [-108.2058, 43.6511], // Thermopolis
     [-107.9567, 44.0166], // Worland
     [-108.0533, 44.4861], // Greybull
-    [-109.0732, 44.5250], // Cody
+    [-109.0732, 44.5250], // Cody (fuel)
     [-109.1856, 44.5063], // Buffalo Bill Dam
     [-109.9000, 44.4890], // East Entrance approach
     [-110.3695, 44.5648], // Fishing Bridge
@@ -34,39 +32,38 @@ export const DAY_ROUTES = {
   day3: [
     [-110.3695, 44.5648], // Fishing Bridge
     [-110.4337, 44.6249], // Mud Volcano
-    [-110.4686, 44.6597], // Hayden Valley
-    [-110.4925, 44.7355], // Canyon Village
-    [-110.4794, 44.7210], // Artist Point
-    [-110.4925, 44.7355], // Canyon (back)
-    [-110.4686, 44.6597], // Hayden Valley
-    [-110.3695, 44.5648], // Fishing Bridge
-  ],
-  day4: [
-    [-110.3695, 44.5648], // Fishing Bridge
+    [-110.4686, 44.6597], // Hayden Valley (dawn)
+    [-110.4686, 44.6597], // Hayden Valley (return)
+    [-110.3695, 44.5648], // Fishing Bridge (back)
     [-110.5729, 44.4163], // West Thumb
     [-110.8281, 44.4605], // Old Faithful
-    [-110.8382, 44.5251], // Grand Prismatic
+    [-110.8382, 44.5251], // Grand Prismatic (Midway)
     [-110.8669, 44.5563], // Firehole Canyon
-    [-110.8636, 44.6433], // Madison CG
+    [-110.8636, 44.6433], // Madison Campground
   ],
-  day5: [
-    [-110.8636, 44.6433], // Madison
+  day4: [
+    [-110.8636, 44.6433], // Madison CG
     [-110.7716, 44.6519], // Gibbon Falls
     [-110.7036, 44.7263], // Norris
     [-110.4925, 44.7355], // Canyon Village
+    [-110.4794, 44.7210], // Artist Point
+    [-110.4925, 44.7355], // Canyon (back to main road)
+    [-110.4686, 44.6597], // Hayden Valley
     [-110.3695, 44.5648], // Fishing Bridge
     [-109.9000, 44.4890], // East Entrance
     [-109.0732, 44.5250], // Cody
-    [-109.0853, 44.5213], // Cody Rodeo
-    [-109.0942, 44.5148], // Parkway RV
+    [-109.0185, 44.4577], // Cody KOA
   ],
-  day6: [
-    [-109.0942, 44.5148], // Parkway RV Cody
-    [-109.0732, 44.5250], // Cody
-    [-108.0533, 44.4861], // Greybull
-    [-107.9567, 44.0166], // Worland
+  day5: [
+    [-109.0185, 44.4577], // Cody KOA
+    [-109.0732, 44.5250], // Cody (fuel)
     [-108.2058, 43.6511], // Thermopolis
     [-108.1010, 43.2336], // Shoshoni
+    [-106.3252, 42.8501], // Casper
+    [-106.3415, 42.9137], // Casper KOA
+  ],
+  day6: [
+    [-106.3415, 42.9137], // Casper KOA
     [-106.3252, 42.8501], // Casper
     [-105.3700, 42.0670], // Douglas
     [-104.8202, 41.1400], // Cheyenne
@@ -232,7 +229,7 @@ function addRouteLayers() {
 
 /* Fetch road-following route geometry from OSRM, cache in localStorage */
 async function getRoadRoute(dayId, waypoints) {
-  const cacheKey = `rv-route-v1-${dayId}`;
+  const cacheKey = `rv-route-v2-${dayId}`;
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) return JSON.parse(cached);
