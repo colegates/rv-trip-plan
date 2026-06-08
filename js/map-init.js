@@ -9,11 +9,10 @@ export const DAY_COLORS = {
 /* Approximate driving-route waypoints per day [lng, lat] (GeoJSON order) */
 export const DAY_ROUTES = {
   day1: [
-    [-104.9446, 39.8324], // Road Bear depot
+    [-104.9446, 39.8324], // Road Bear depot (Commerce City)
     [-104.9281, 39.8047], // Walmart Commerce City
-    [-104.9903, 39.7392], // Denver
-    [-104.8202, 41.1400], // Cheyenne
-    [-105.3700, 42.0670], // Douglas
+    [-104.8202, 41.1400], // Cheyenne (I-25 N)
+    [-105.3824, 42.7597], // Douglas WY (I-25/US-20 junction)
     [-106.3252, 42.8501], // Casper
     [-106.3415, 42.9137], // Casper KOA
   ],
@@ -65,7 +64,7 @@ export const DAY_ROUTES = {
   day6: [
     [-106.3415, 42.9137], // Casper KOA
     [-106.3252, 42.8501], // Casper
-    [-105.3700, 42.0670], // Douglas
+    [-105.3824, 42.7597], // Douglas WY (I-25/US-20 junction)
     [-104.8202, 41.1400], // Cheyenne
     [-105.0752, 40.5853], // Fort Collins
     [-105.1089, 40.6148], // Fort Collins KOA
@@ -73,8 +72,7 @@ export const DAY_ROUTES = {
   day7: [
     [-105.1089, 40.6148], // Fort Collins KOA
     [-105.0752, 40.5853], // Fort Collins
-    [-104.9903, 39.7392], // Denver
-    [-104.9446, 39.8324], // Road Bear depot
+    [-104.9446, 39.8324], // Road Bear depot (Commerce City)
     [-104.6737, 39.8561], // DIA
   ],
 };
@@ -229,7 +227,7 @@ function addRouteLayers() {
 
 /* Fetch road-following route geometry from OSRM, cache in localStorage */
 async function getRoadRoute(dayId, waypoints) {
-  const cacheKey = `rv-route-v2-${dayId}`;
+  const cacheKey = `rv-route-v3-${dayId}`;
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) return JSON.parse(cached);
