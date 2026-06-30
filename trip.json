@@ -442,6 +442,18 @@
       "notes": "Celebrates the world's largest outdoor rodeo. Great carriage collection. Quick stop on I-25 route."
     },
     {
+      "id": "bucees-johnstown",
+      "kind": "poi",
+      "category": "Fuel/Services",
+      "name": "Buc-ee's Johnstown",
+      "lat": 40.3480,
+      "lng": -104.9124,
+      "address": "7900 Buc-ee's Blvd, Johnstown, CO 80534",
+      "website": "https://buc-ees.com/",
+      "notes": "Giant travel plaza on I-25 exit 252. 100+ fuel pumps — perfect for filling the RV tank. Massive store: brisket sandwiches, kolaches, beaver nuggets, fudge, jerky. Stock up for the week heading into Yellowstone (Day 1), or grab road-trip treats on the way home (Day 7).",
+      "dayIds": ["day1", "day7"]
+    },
+    {
       "id": "terry-bison",
       "kind": "poi",
       "name": "Terry Bison Ranch",
