@@ -38,17 +38,18 @@ export const DAY_ROUTES = {
     [-110.8281, 44.4605], // Old Faithful
     [-110.8382, 44.5251], // Grand Prismatic (Midway)
     [-110.8669, 44.5563], // Firehole Canyon
-    [-110.8636, 44.6433], // Madison Campground
+    [-110.8281, 44.4605], // Old Faithful (return)
+    [-110.5729, 44.4163], // West Thumb (return)
+    [-110.3695, 44.5648], // Fishing Bridge (overnight, night 3)
   ],
   day4: [
-    [-110.8636, 44.6433], // Madison CG
-    [-110.7716, 44.6519], // Gibbon Falls
-    [-110.7036, 44.7263], // Norris
+    [-110.3695, 44.5648], // Fishing Bridge
+    [-110.4686, 44.6597], // Hayden Valley
     [-110.4925, 44.7355], // Canyon Village
     [-110.4794, 44.7210], // Artist Point
     [-110.4925, 44.7355], // Canyon (back to main road)
-    [-110.4686, 44.6597], // Hayden Valley
-    [-110.3695, 44.5648], // Fishing Bridge
+    [-110.4686, 44.6597], // Hayden Valley (return)
+    [-110.3695, 44.5648], // Fishing Bridge (back)
     [-109.9000, 44.4890], // East Entrance
     [-109.0732, 44.5250], // Cody
     [-109.0185, 44.4577], // Cody KOA
@@ -227,7 +228,7 @@ function addRouteLayers() {
 
 /* Fetch road-following route geometry from OSRM, cache in localStorage */
 async function getRoadRoute(dayId, waypoints) {
-  const cacheKey = `rv-route-v3-${dayId}`;
+  const cacheKey = `rv-route-v4-${dayId}`;
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) return JSON.parse(cached);

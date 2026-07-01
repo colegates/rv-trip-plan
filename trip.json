@@ -1,7 +1,7 @@
 {
   "schema": "rvtrip.v1",
   "mode": "replace",
-  "label": "Denver ↔ Yellowstone RV Trip, July 2026",
+  "label": "Denver ↔ Yellowstone RV Trip, July 2026 (Fishing Bridge x2)",
   "trip": {
     "title": "Denver ↔ Yellowstone RV Trip",
     "startDate": "2026-07-09",
@@ -56,11 +56,11 @@
     {
       "id": "day3",
       "date": "2026-07-11",
-      "title": "Dawn Hayden Valley, then Geysers to Madison",
-      "fromTo": "Fishing Bridge → Hayden Valley → West Thumb → Old Faithful → Madison",
-      "driveTime": "2h25",
-      "distanceMiles": 96,
-      "summary": "Up at dawn for the best wildlife window in the park — Hayden Valley bison, elk, and maybe a grizzly. Then west via West Thumb Geyser Basin, Old Faithful & the Upper Geyser Basin, and Grand Prismatic Spring to Madison Campground on the river.",
+      "title": "Dawn Hayden Valley, then Geysers Loop",
+      "fromTo": "Fishing Bridge → Hayden Valley → West Thumb → Old Faithful → Fishing Bridge",
+      "driveTime": "3h10",
+      "distanceMiles": 128,
+      "summary": "Up at dawn for the best wildlife window in the park — Hayden Valley bison, elk, and maybe a grizzly. Then west via West Thumb Geyser Basin, Old Faithful & the Upper Geyser Basin, and Grand Prismatic Spring, looping back to Fishing Bridge RV Park for a second night (Madison Campground was fully booked).",
       "order": 3,
       "legs": [
         { "from": "Fishing Bridge", "to": "Hayden Valley (dawn)", "depart": "05:15", "arrive": "05:40", "driveTime": "0h25", "miles": 16 },
@@ -68,35 +68,35 @@
         { "from": "Fishing Bridge", "to": "West Thumb", "depart": "09:00", "arrive": "09:20", "driveTime": "0h20", "miles": 21 },
         { "from": "West Thumb", "to": "Old Faithful", "depart": "09:30", "arrive": "10:05", "driveTime": "0h35", "miles": 19 },
         { "from": "Old Faithful", "to": "Midway (Grand Prismatic)", "depart": "", "arrive": "", "driveTime": "0h15", "miles": 8 },
-        { "from": "Midway", "to": "Madison Campground", "depart": "15:30", "arrive": "15:55", "driveTime": "0h25", "miles": 16 }
+        { "from": "Midway", "to": "Fishing Bridge", "depart": "15:30", "arrive": "16:40", "driveTime": "1h10", "miles": 48 }
       ],
       "schedule": [
         { "time": "~05:15", "text": "Dawn wildlife drive — Hayden Valley (25 min north): first light is the best wildlife window in the park — big bison herds, elk, and a good chance of grizzly or wolf at distance. Bring binoculars; stay 100 yds from bears/wolves." },
-        { "time": "~08:30", "text": "Back for breakfast. Before heading west: fill the fresh-water tank and use the dump station at Fishing Bridge (Madison has no hook-ups)." },
+        { "time": "~08:30", "text": "Back for breakfast at the campsite." },
         { "time": "Morning", "text": "West Thumb Geyser Basin — colourful hot springs right on the lakeshore; a quick warm-up boardwalk." },
         { "time": "", "text": "Old Faithful & Upper Geyser Basin — check the predicted eruption time, walk the boardwalks (Castle, Grand, Morning Glory Pool) and step inside the historic Old Faithful Inn. Lunch here." },
         { "time": "", "text": "Midway Geyser Basin — Grand Prismatic Spring, the largest hot spring in the US. Overlook trail open; check the NPS app for closures. Optional: a dip on Firehole Canyon Drive on the way." },
-        { "time": "15:30", "text": "Depart Midway." },
-        { "time": "~16:00", "text": "Set up at Madison — a lovely change of scene on the Madison River; bison in the meadows, elk at dusk. Dry camping (generator 8 AM–8 PM; cool nights at 6,800 ft, no overnight AC needed; no showers tonight — you showered at Fishing Bridge)." }
+        { "time": "15:30", "text": "Depart Midway, retracing through Old Faithful and West Thumb back to Fishing Bridge." },
+        { "time": "~16:40", "text": "Back at Fishing Bridge — same site for a second night. Full hookups, showers, laundry." }
       ]
     },
     {
       "id": "day4",
       "date": "2026-07-12",
-      "title": "Madison → Canyon → Cody & the Rodeo",
-      "fromTo": "Madison → Canyon Village → Cody, WY",
-      "driveTime": "3h25",
-      "distanceMiles": 125,
-      "summary": "Morning at the Grand Canyon of the Yellowstone — Artist Point and the Lower Falls. Drive south through Hayden Valley, exit via the East Entrance down the Wapiti Valley. Afternoon at the Buffalo Bill Center of the West, then the Cody Nite Rodeo at 8 PM (free KOA shuttle at 7 PM).",
+      "title": "Fishing Bridge → Canyon → Cody & the Rodeo",
+      "fromTo": "Fishing Bridge → Canyon Village → Cody, WY",
+      "driveTime": "3h10",
+      "distanceMiles": 133,
+      "summary": "Morning at the Grand Canyon of the Yellowstone — Artist Point and the Lower Falls, via Hayden Valley both ways. Exit via the East Entrance down the Wapiti Valley. Afternoon at the Buffalo Bill Center of the West, then the Cody Nite Rodeo at 8 PM (free KOA shuttle at 7 PM).",
       "order": 4,
       "legs": [
-        { "from": "Madison", "to": "Canyon (via Norris)", "depart": "08:00", "arrive": "09:00", "driveTime": "1h00", "miles": 26 },
+        { "from": "Fishing Bridge", "to": "Canyon (via Hayden Valley)", "depart": "08:00", "arrive": "08:45", "driveTime": "0h45", "miles": 27 },
         { "from": "Canyon", "to": "Fishing Bridge (via Hayden Valley)", "depart": "10:45", "arrive": "11:30", "driveTime": "0h45", "miles": 27 },
         { "from": "Fishing Bridge", "to": "East Entrance → Cody", "depart": "11:45", "arrive": "13:50", "driveTime": "1h40", "miles": 79 }
       ],
       "schedule": [
-        { "time": "Morning", "text": "Grand Canyon of the Yellowstone — Artist Point and the Lower Falls. Optional: Norris Geyser Basin stop en route from Madison." },
-        { "time": "08:00", "text": "Depart Madison → Canyon via Norris (1h). Artist Point, Lower Falls overlooks." },
+        { "time": "Morning", "text": "Grand Canyon of the Yellowstone — Artist Point and the Lower Falls." },
+        { "time": "08:00", "text": "Depart Fishing Bridge → Canyon via Hayden Valley (another good wildlife window) — 45 min. Artist Point, Lower Falls overlooks." },
         { "time": "10:45", "text": "Depart Canyon → Fishing Bridge via Hayden Valley — wildlife roll south (bison, elk, often grizzly or wolf at distance; stay 100 yds back)." },
         { "time": "11:45", "text": "Depart Fishing Bridge → East Entrance → Cody via the gorgeous Wapiti Valley." },
         { "time": "~14:00", "text": "Arrive Cody — Buffalo Bill Center of the West (firearms, Plains Indian, art, natural history, Buffalo Bill wings; 2–3h, closes 6 PM). Wear the new hats! Check in at the KOA and have a swim." },
@@ -184,20 +184,8 @@
       "address": "Yellowstone NP, WY 82190",
       "phone": "+13073447311",
       "website": "https://www.yellowstonenationalparklodges.com/",
-      "notes": "Night 2. Full hookups (hard-sided RVs only — bear country). Reservation required. Fill fresh-water tank and dump before moving to Madison.",
-      "dayIds": ["day2"]
-    },
-    {
-      "id": "madison",
-      "kind": "campground",
-      "name": "Madison Campground",
-      "lat": 44.6433,
-      "lng": -110.8636,
-      "address": "30 Madison Campground Rd, Yellowstone NP",
-      "phone": "+13073447311",
-      "website": "https://www.yellowstonenationalparklodges.com/",
-      "notes": "Night 3. Dry camping (no hookups). Generator 8 AM–8 PM. Bear boxes required. Sells out first — book immediately.",
-      "dayIds": ["day3"]
+      "notes": "Nights 2 & 3 (2 nights — Madison Campground was fully booked, so we kept the same site instead of moving). Full hookups (hard-sided RVs only — bear country). Reservation required.",
+      "dayIds": ["day2", "day3"]
     },
     {
       "id": "cody-koa",
@@ -380,8 +368,7 @@
       "lng": -110.7036,
       "address": "Norris, Yellowstone NP",
       "phone": "",
-      "notes": "Hottest and most dynamic geyser basin in the park. On the route from Madison to Canyon (Day 4). Two loop trails (Porcelain Basin ½ mi, Back Basin 1.5 mi).",
-      "dayIds": ["day4"]
+      "notes": "Hottest and most dynamic geyser basin in the park. Not on the Day 4 route anymore (now via Hayden Valley instead of Norris) — optional detour if you have spare time. Two loop trails (Porcelain Basin ½ mi, Back Basin 1.5 mi)."
     },
     {
       "id": "den-airport",
@@ -402,8 +389,7 @@
       "category": "Sights",
       "lat": 44.6519,
       "lng": -110.7716,
-      "notes": "84-ft falls visible from the road between Madison and Norris. Easy stop on Day 4 morning drive toward Canyon.",
-      "dayIds": ["day4"]
+      "notes": "84-ft falls visible from the road between Madison and Norris. Not on the Day 4 route anymore (now via Hayden Valley) — optional detour only."
     },
     {
       "id": "firehole-canyon",
@@ -454,6 +440,18 @@
       "lng": -104.8369,
       "address": "4610 N Carey Ave, Cheyenne, WY",
       "notes": "Celebrates the world's largest outdoor rodeo. Great carriage collection. Quick stop on I-25 route."
+    },
+    {
+      "id": "bucees-johnstown",
+      "kind": "poi",
+      "category": "Fuel/Services",
+      "name": "Buc-ee's Johnstown",
+      "lat": 40.3480,
+      "lng": -104.9124,
+      "address": "7900 Buc-ee's Blvd, Johnstown, CO 80534",
+      "website": "https://buc-ees.com/",
+      "notes": "Giant travel plaza on I-25 exit 252. 100+ fuel pumps — perfect for filling the RV tank. Massive store: brisket sandwiches, kolaches, beaver nuggets, fudge, jerky. Stock up for the week heading into Yellowstone (Day 1), or grab road-trip treats on the way home (Day 7).",
+      "dayIds": ["day1", "day7"]
     },
     {
       "id": "terry-bison",
