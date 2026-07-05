@@ -6,11 +6,14 @@
 /* Trip area bbox — same as the basemap workflow default */
 const BBOX = { west: -111.2, south: 39.6, east: -104.4, north: 45.2 };
 
-/* Zoom ranges per source (higher zoom = more tiles & larger files) */
+/* Zoom ranges per source (higher zoom = more tiles & larger files)
+   Budget: ~3x original — topo/sat gain one extra zoom level each.
+   topo z12 adds trail names, contour detail, small roads.
+   sat  z11 adds road-level satellite resolution across the trip corridor. */
 const SOURCES = [
-  { id: 'topo',    minZ: 4, maxZ: 11,
+  { id: 'topo',    minZ: 4, maxZ: 12,
     url: (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${z}/${y}/${x}` },
-  { id: 'sat',     minZ: 4, maxZ: 10,
+  { id: 'sat',     minZ: 4, maxZ: 11,
     url: (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}` },
   { id: 'places',  minZ: 4, maxZ: 11,
     url: (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/${z}/${y}/${x}` },
@@ -18,9 +21,9 @@ const SOURCES = [
     url: (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/${z}/${y}/${x}` },
 ];
 
-const SAT_CACHE  = 'rv-trip-satellite-v1';
-const DONE_KEY   = 'rv-tiles-precached-v1';
-const CONCURRENCY = 8;   /* parallel fetches — Esri CDN handles this fine */
+const SAT_CACHE  = 'rv-trip-satellite-v2';
+const DONE_KEY   = 'rv-tiles-precached-v2';
+const CONCURRENCY = 12;  /* parallel fetches — higher for bigger tile set */
 
 /* ── Public API ─────────────────────────────────────────────────────────── */
 
