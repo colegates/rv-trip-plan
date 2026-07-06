@@ -6,7 +6,7 @@ const CACHE_VERSION = 'v8';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
 
 /* Satellite tile cache — kept separate so it survives main cache version bumps */
-const SAT_CACHE = 'rv-trip-satellite-v3';
+const SAT_CACHE = 'rv-trip-satellite-v4';
 const SAT_HOST  = 'server.arcgisonline.com';
 
 /* Minimal 1×1 transparent PNG returned when a satellite tile is unavailable offline */
