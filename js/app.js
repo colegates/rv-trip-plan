@@ -109,8 +109,6 @@ async function updateInfoPanel() {
     if (titleEl) titleEl.textContent = meta.title || '';
     const vehicleEl = document.getElementById('trip-vehicle-meta');
     if (vehicleEl) vehicleEl.textContent = meta.vehicle || '';
-    const bookingEl = document.getElementById('trip-booking-meta');
-    if (bookingEl) bookingEl.textContent = meta.booking || '';
   }
   updateTileCacheStatus();
 }
