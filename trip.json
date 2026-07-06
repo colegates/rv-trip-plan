@@ -1,7 +1,7 @@
 {
   "schema": "rvtrip.v1",
   "mode": "replace",
-  "label": "Denver ↔ Yellowstone RV Trip, July 2026 (Fishing Bridge x2)",
+  "label": "Denver ↔ Yellowstone RV Trip, July 2026 v2",
   "trip": {
     "title": "Denver ↔ Yellowstone RV Trip",
     "startDate": "2026-07-09",
