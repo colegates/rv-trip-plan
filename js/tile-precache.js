@@ -1,13 +1,13 @@
 /* Offline tile pre-cacher — tiered multi-region download strategy
    ─────────────────────────────────────────────────────────────────
    Tier 1  Full route corridor   z4–z12  topo/places/roads
-                                 z4–z11  sat  (overview)
+                                 z4–z11  sat  (overview only)
    Tier 2  Non-Yellowstone stops z13–z15 topo/places/roads
            (~9 km boxes: Commerce City, Casper, Thermopolis, Cody, Fort Collins)
-   Tier 3  Yellowstone park      z13–z16 topo/places/roads (full trail detail)
-                                 z12–z14 sat  (detailed in-park imagery)
+   Tier 3  Yellowstone park      z13–z16 topo/places/roads (map view only)
+           No high-detail satellite — sat stays at overview level everywhere.
 
-   Total: ~208k tiles / ~3.4 GB
+   Total: ~200k tiles / ~3.1 GB
    z16 topo = ~2.4 m/px — individual trails, campsite loops, boardwalks visible
 */
 
@@ -50,15 +50,14 @@ const REGIONS = [
     id: `stop-${s.id}`, bbox: s.box, layers: ['topo', 'places', 'roads'], minZ: 13, maxZ: 15,
   })),
 
-  /* Tier 3 — Yellowstone: full park at highest map detail + detailed satellite */
+  /* Tier 3 — Yellowstone: full park at highest map detail (topo only) */
   { id: 'yell-topo',   bbox: YELL_BBOX, layers: ['topo'],           minZ: 13, maxZ: 16 },
   { id: 'yell-labels', bbox: YELL_BBOX, layers: ['places', 'roads'],minZ: 13, maxZ: 15 },
-  { id: 'yell-sat',    bbox: YELL_BBOX, layers: ['sat'],            minZ: 12, maxZ: 14 },
 ];
 
 /* ── Cache constants ─────────────────────────────────────────────────────── */
-const SAT_CACHE   = 'rv-trip-satellite-v4';
-const DONE_KEY    = 'rv-tiles-precached-v4';
+const SAT_CACHE   = 'rv-trip-satellite-v5';
+const DONE_KEY    = 'rv-tiles-precached-v5';
 const CONCURRENCY = 16;  /* parallel fetches — more headroom for the larger set */
 
 /* ── Public API ──────────────────────────────────────────────────────────── */
