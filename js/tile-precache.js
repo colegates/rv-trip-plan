@@ -56,9 +56,9 @@ const REGIONS = [
 ];
 
 /* ── Cache constants ─────────────────────────────────────────────────────── */
-const SAT_CACHE   = 'rv-trip-satellite-v5';
-const DONE_KEY    = 'rv-tiles-precached-v5';
-const CONCURRENCY = 16;  /* parallel fetches — more headroom for the larger set */
+const SAT_CACHE   = 'rv-trip-satellite-v6';
+const DONE_KEY    = 'rv-tiles-precached-v6';
+const CONCURRENCY = 8;  /* conservative — avoids Esri rate limits on large batches */
 
 /* ── Public API ──────────────────────────────────────────────────────────── */
 
@@ -69,30 +69,58 @@ export function tilesAlreadyCached() {
 /**
  * Download all trip-area tiles into the cache.
  * @param {function(pct:number, done:number, total:number, regionId:string):void} onProgress
+ * @returns {Promise<{ok:number, skipped:number, failed:number, quotaHit:boolean}>}
  */
 export async function preCacheMapTiles(onProgress) {
   const cache = await caches.open(SAT_CACHE);
 
   const allTiles = buildTileList();
   const total = allTiles.length;
-  let done = 0;
+  let done = 0, ok = 0, failed = 0, skipped = 0;
+  let quotaHit = false;
 
   for (let i = 0; i < allTiles.length; i += CONCURRENCY) {
+    if (quotaHit) break;
+
     const batch = allTiles.slice(i, i + CONCURRENCY);
-    await Promise.allSettled(batch.map(async ({ url, regionId }) => {
-      try {
-        if (!(await cache.match(url))) {
-          const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
-          if (res.ok) await cache.put(url, res.clone());
-        }
-      } catch { /* skip on network error — tile fetched on demand when online */ }
-      done++;
-      onProgress?.(Math.round(done / total * 100), done, total, regionId);
+    const results = await Promise.allSettled(batch.map(async ({ url, regionId }) => {
+      const cached = await cache.match(url);
+      if (cached) { skipped++; return 'skipped'; }
+
+      const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
+      if (!res.ok) { failed++; return 'failed'; }
+
+      await cache.put(url, res);
+      ok++;
+      return 'ok';
     }));
+
+    for (const r of results) {
+      if (r.status === 'rejected') {
+        const err = r.reason;
+        if (err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                    (err.message && err.message.toLowerCase().includes('quota')))) {
+          quotaHit = true;
+        } else {
+          failed++;
+        }
+      }
+    }
+
+    done = Math.min(i + CONCURRENCY, total);
+    onProgress?.(Math.round(done / total * 100), done, total,
+      batch[0]?.regionId ?? '');
+
     await new Promise(r => setTimeout(r, 0)); /* yield to keep UI responsive */
   }
 
-  localStorage.setItem(DONE_KEY, new Date().toISOString());
+  const stats = { ok, skipped, failed, quotaHit };
+
+  if (!quotaHit) {
+    localStorage.setItem(DONE_KEY, JSON.stringify({ ts: new Date().toISOString(), ...stats }));
+  }
+
+  return stats;
 }
 
 export function countTiles() {
