@@ -7,8 +7,7 @@
     "startDate": "2026-07-09",
     "endDate": "2026-07-15",
     "vehicle": "Road Bear Class C 29–31'",
-    "booking": "CXF847765-1",
-    "notes": "1,400 included miles (~$0.45/mi over). Return RV full; drop by 10:30 am Wed 15 Jul (Drop & Go). Fly 14:05 to Orlando."
+    "notes": "1,400 included miles (overage charged per mile). Return RV full; drop by 10:30 am Wed 15 Jul (Drop & Go). Fly home afternoon."
   },
   "days": [
     {
@@ -25,7 +24,7 @@
       ],
       "schedule": [
         { "time": "11:00", "text": "Land at DEN. Bags claim at 11:45, then Road Bear shuttle / Uber to the branch (~20 min)." },
-        { "time": "13:00", "text": "Pickup appointment, 6586 Brighton Blvd. Walkthrough 60–90 min, paperwork, deposit. Balance $4,085.03 due ($300 already paid on the Amex)." },
+        { "time": "13:00", "text": "Pickup appointment, 6586 Brighton Blvd. Walkthrough 60–90 min, paperwork, deposit." },
         { "time": "~14:30", "text": "Big shop — Walmart Supercenter, 5990 Dahlia St (5 min from the branch): a week of water, food, snacks, coffee, sealed/zip bags for bear-safe storage, sunscreen, bug spray, torches." },
         { "time": "15:30", "text": "North on I-25. ~17:45 fuel & leg-stretch at Wheatland (~140 mi). Summer light to ~20:45." },
         { "time": "~20:15", "text": "Arrive Casper; cook in or grab dinner." }
@@ -150,7 +149,7 @@
       "fromTo": "Fort Collins, CO → Denver International Airport",
       "driveTime": "1h00",
       "distanceMiles": 50,
-      "summary": "Easy morning drive south on I-25. Drop RV at Road Bear depot by 10:30 AM (Drop & Go — no tank-dump or clean needed). Transfer to DEN; fly home 14:05.",
+      "summary": "Easy morning drive south on I-25. Drop RV at Road Bear depot by 10:30 AM (Drop & Go — no tank-dump or clean needed). Transfer to DEN; fly home.",
       "order": 7,
       "legs": [
         { "from": "Fort Collins", "to": "Road Bear branch", "depart": "07:30", "arrive": "08:30", "driveTime": "1h00", "miles": 50 }
@@ -158,7 +157,7 @@
       "schedule": [
         { "time": "07:30", "text": "Depart; top the tank to FULL near the branch (return full — stations on Brighton Blvd / near I-270)." },
         { "time": "08:30", "text": "Arrive 6586 Brighton Blvd. Drop-off window 8:00–10:30 AM. Drop & Go (Platinum Plus) — no tank-dumping or final clean, just hand it back (~30–45 min)." },
-        { "time": "~09:30", "text": "Transfer to DEN (~30 min). Be airside by ~12:00 for the 14:05 flight to Orlando." }
+        { "time": "~09:30", "text": "Transfer to DEN (~30 min). Allow plenty of time at the airport." }
       ]
     }
   ],
@@ -220,7 +219,7 @@
       "address": "6586 Brighton Blvd, Commerce City, CO 80022",
       "phone": "+17205701100",
       "website": "https://www.roadbearrv.com/",
-      "notes": "Pickup Day 1 (1:00–4:00 PM appointment). Return by 10:30 AM Day 7 (Drop & Go — no tank dump or clean needed). Booking CXF847765-1. Balance $4,085.03 due at pickup.",
+      "notes": "Pickup Day 1 (1:00–4:00 PM appointment). Return by 10:30 AM Day 7 (Drop & Go — no tank dump or clean needed).",
       "dayIds": ["day1", "day7"]
     },
     {
@@ -379,7 +378,7 @@
       "address": "8500 Peña Blvd, Denver, CO 80249",
       "phone": "",
       "website": "https://www.flydenver.com/",
-      "notes": "Flight departs 14:05 to Orlando. Allow 1.5h minimum after returning the RV (10:30 drop). Be airside by ~12:00.",
+      "notes": "Allow 1.5h minimum after returning the RV (10:30 drop) before heading airside.",
       "dayIds": ["day7"]
     },
     {

@@ -138,7 +138,7 @@ function buildDayBody(body, day, places, campByDay, dayMap) {
       <div class="itin-section-title">Where you're staying</div>
       <div class="itin-stay-card itin-stay-flyout">
         <div class="itin-stay-name">Drop-off &amp; fly home</div>
-        <div class="itin-stay-detail">Road Bear depot by 10:30 AM &middot; Fly 14:05 to Orlando</div>
+        <div class="itin-stay-detail">Road Bear depot by 10:30 AM &middot; Fly home</div>
       </div>`;
   } else if (camp) {
     const nameHtml = `<div class="itin-stay-name">${esc(camp.name)}</div>`;
