@@ -143,13 +143,18 @@ async function startManualPrecache() {
   showToast('📥 Downloading offline maps… this may take a few minutes', 8000);
 
   try {
-    await preCacheMapTiles((pct, done, total, sourceId) => {
+    const stats = await preCacheMapTiles((pct, done, total, sourceId) => {
       if (fill) fill.style.width = `${pct}%`;
       if (statusEl) statusEl.textContent = `📥 ${pct}% — caching ${sourceId} tiles…`;
     });
     updateTileCacheStatus();
     if (bar) bar.style.display = 'none';
-    showToast('✅ All offline maps saved!', 4000);
+    if (stats.quotaHit) {
+      showToast('⚠️ Storage full — install as PWA (Add to Home Screen) for more space', 7000);
+      if (statusEl) statusEl.textContent = `⚠️ Storage quota reached — ${(stats.ok + stats.skipped).toLocaleString()} tiles saved`;
+    } else {
+      showToast(`✅ Offline maps saved! (${stats.ok.toLocaleString()} new tiles)`, 4000);
+    }
   } catch (e) {
     showToast('⚠️ Map caching failed — try again online', 4000);
   }
