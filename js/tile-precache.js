@@ -2,31 +2,32 @@
    ─────────────────────────────────────────────────────────────────
    Tier 1  Full route corridor   z4–z12  topo/places/roads
                                  z4–z11  sat  (overview)
-   Tier 2  Key stop areas        z13–z15 topo/places/roads
-           (~9 km radius boxes around each campground/major stop)
-   Tier 3  Yellowstone park      z12–z14 sat  (detailed in-park imagery)
+   Tier 2  Non-Yellowstone stops z13–z15 topo/places/roads
+           (~9 km boxes: Commerce City, Casper, Thermopolis, Cody, Fort Collins)
+   Tier 3  Yellowstone park      z13–z16 topo/places/roads (full trail detail)
+                                 z12–z14 sat  (detailed in-park imagery)
 
-   Total: ~60k tiles / ~900 MB
+   Total: ~208k tiles / ~3.4 GB
+   z16 topo = ~2.4 m/px — individual trails, campsite loops, boardwalks visible
 */
 
 /* ── Bounding boxes ──────────────────────────────────────────────────────── */
 const FULL_BBOX = { west: -111.2, south: 39.6, east: -104.4, north: 45.2 };
 const YELL_BBOX = { west: -111.2, south: 44.0, east: -109.8, north: 45.2 };
 
-/* Key stops — pad ±0.12° (~9 km) around each lat/lng centre */
+/* Non-Yellowstone key stops — pad ±0.12° (~9 km) around each centre */
 const PAD = 0.12;
 function stopBox(lng, lat) {
   return { west: lng - PAD, east: lng + PAD, south: lat - PAD, north: lat + PAD };
 }
 const STOP_BOXES = [
-  { id: 'commerce-city',  box: stopBox(-104.94, 39.83) }, // Road Bear depot / DIA area
-  { id: 'casper',         box: stopBox(-106.34, 42.91) }, // Casper KOA nights 1 & 5
-  { id: 'thermopolis',    box: stopBox(-108.21, 43.65) }, // Hot Springs stop
-  { id: 'cody',           box: stopBox(-109.07, 44.52) }, // Cody KOA + rodeo + museum
-  { id: 'fishing-bridge', box: stopBox(-110.37, 44.56) }, // Fishing Bridge RV Park nights 2 & 3
-  { id: 'old-faithful',   box: stopBox(-110.83, 44.46) }, // Old Faithful + Upper Geyser Basin
-  { id: 'canyon-village', box: stopBox(-110.49, 44.74) }, // Grand Canyon of Yellowstone
-  { id: 'fort-collins',   box: stopBox(-105.08, 40.58) }, // Fort Collins KOA night 6
+  { id: 'commerce-city', box: stopBox(-104.94, 39.83) }, // Road Bear depot + DIA area
+  { id: 'casper',        box: stopBox(-106.34, 42.91) }, // Casper KOA nights 1 & 5
+  { id: 'thermopolis',   box: stopBox(-108.21, 43.65) }, // Hot Springs stop
+  { id: 'cody',          box: stopBox(-109.07, 44.52) }, // Cody KOA + rodeo + museum
+  { id: 'fort-collins',  box: stopBox(-105.08, 40.58) }, // Fort Collins KOA night 6
+  // Yellowstone stops (Fishing Bridge, Old Faithful, Canyon) are covered by
+  // the full YELL_BBOX Tier 3 below — no separate stop boxes needed.
 ];
 
 /* ── Source URL factories ────────────────────────────────────────────────── */
@@ -38,26 +39,27 @@ const SRC_URL = {
 };
 
 /* ── Region definitions ──────────────────────────────────────────────────── */
-/* Each region: { id, bbox, layers:['topo',...], minZ, maxZ } */
 const REGIONS = [
-  /* Tier 1 — full corridor, medium detail */
-  { id: 'full-topo',   bbox: FULL_BBOX, layers: ['topo'],          minZ: 4, maxZ: 12 },
-  { id: 'full-sat',    bbox: FULL_BBOX, layers: ['sat'],           minZ: 4, maxZ: 11 },
-  { id: 'full-labels', bbox: FULL_BBOX, layers: ['places','roads'],minZ: 4, maxZ: 12 },
+  /* Tier 1 — full corridor, driving-level detail */
+  { id: 'full-topo',   bbox: FULL_BBOX, layers: ['topo'],           minZ: 4, maxZ: 12 },
+  { id: 'full-sat',    bbox: FULL_BBOX, layers: ['sat'],            minZ: 4, maxZ: 11 },
+  { id: 'full-labels', bbox: FULL_BBOX, layers: ['places', 'roads'],minZ: 4, maxZ: 12 },
 
-  /* Tier 2 — stop boxes, high-detail topo (z13–z15 = campsite / trail level) */
+  /* Tier 2 — non-Yellowstone stop boxes, campsite-level topo (z13–z15) */
   ...STOP_BOXES.map(s => ({
-    id: `stop-${s.id}`, bbox: s.box, layers: ['topo','places','roads'], minZ: 13, maxZ: 15,
+    id: `stop-${s.id}`, bbox: s.box, layers: ['topo', 'places', 'roads'], minZ: 13, maxZ: 15,
   })),
 
-  /* Tier 3 — Yellowstone satellite z12–z14 (z4–z11 already covered by full-sat) */
-  { id: 'yell-sat', bbox: YELL_BBOX, layers: ['sat'], minZ: 12, maxZ: 14 },
+  /* Tier 3 — Yellowstone: full park at highest map detail + detailed satellite */
+  { id: 'yell-topo',   bbox: YELL_BBOX, layers: ['topo'],           minZ: 13, maxZ: 16 },
+  { id: 'yell-labels', bbox: YELL_BBOX, layers: ['places', 'roads'],minZ: 13, maxZ: 15 },
+  { id: 'yell-sat',    bbox: YELL_BBOX, layers: ['sat'],            minZ: 12, maxZ: 14 },
 ];
 
 /* ── Cache constants ─────────────────────────────────────────────────────── */
-const SAT_CACHE   = 'rv-trip-satellite-v3';
-const DONE_KEY    = 'rv-tiles-precached-v3';
-const CONCURRENCY = 14;  /* parallel fetches */
+const SAT_CACHE   = 'rv-trip-satellite-v4';
+const DONE_KEY    = 'rv-tiles-precached-v4';
+const CONCURRENCY = 16;  /* parallel fetches — more headroom for the larger set */
 
 /* ── Public API ──────────────────────────────────────────────────────────── */
 
@@ -84,7 +86,7 @@ export async function preCacheMapTiles(onProgress) {
           const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
           if (res.ok) await cache.put(url, res.clone());
         }
-      } catch { /* skip on network error — fetched on demand when online */ }
+      } catch { /* skip on network error — tile fetched on demand when online */ }
       done++;
       onProgress?.(Math.round(done / total * 100), done, total, regionId);
     }));
