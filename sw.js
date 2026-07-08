@@ -2,11 +2,11 @@
    Cache version: bump CACHE_VERSION to force a full refresh on all clients.
 */
 
-const CACHE_VERSION = 'v10';
+const CACHE_VERSION = 'v11';
 const CACHE_NAME    = `rv-trip-${CACHE_VERSION}`;
 
 /* Satellite tile cache — kept separate so it survives main cache version bumps */
-const SAT_CACHE = 'rv-trip-satellite-v6';
+const SAT_CACHE = 'rv-trip-satellite-v7';
 const SAT_HOST  = 'server.arcgisonline.com';
 
 /* Minimal 1×1 transparent PNG returned when a satellite tile is unavailable offline */
