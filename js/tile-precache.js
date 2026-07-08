@@ -1,19 +1,27 @@
 /* Offline tile pre-cacher — tiered multi-region download strategy
    ─────────────────────────────────────────────────────────────────
-   Tier 1  Full route corridor   z4–z12  topo/places/roads
-                                 z4–z11  sat  (overview only)
-   Tier 2  Non-Yellowstone stops z13–z15 topo/places/roads
-           (~9 km boxes: Commerce City, Casper, Thermopolis, Cody, Fort Collins)
-   Tier 3  Yellowstone park      z13–z16 topo/places/roads (map view only)
-           No high-detail satellite — sat stays at overview level everywhere.
+   Tier 1  Full route corridor   z4–z11  topo/places/roads
+                                 z4–z9   sat  (overview only — stays small)
+   Tier 2  Non-Yellowstone stops z12–z13 topo/places/roads
+           (Casper, Cody, Commerce City, Thermopolis, Fort Collins)
+   Tier 3  Full Yellowstone park z12–z13 topo/places/roads
+           (navigation-level — road names, lake shores, thermal areas)
+   Tier 4  Yellowstone Grand Loop core z14 topo
+           (7 m/px — campsite loops, trailheads, boardwalks visible)
 
-   Total: ~200k tiles / ~3.1 GB
-   z16 topo = ~2.4 m/px — individual trails, campsite loops, boardwalks visible
+   Estimated total: ~65 k tiles / ~380 MB
+   Tuned to stay under 400 MB while giving maximum Yellowstone detail.
 */
 
 /* ── Bounding boxes ──────────────────────────────────────────────────────── */
 const FULL_BBOX = { west: -111.2, south: 39.6, east: -104.4, north: 45.2 };
+
+/* Full Yellowstone park bbox (used at z12–z13 navigation zoom) */
 const YELL_BBOX = { west: -111.2, south: 44.0, east: -109.8, north: 45.2 };
+
+/* Grand Loop core — covers Old Faithful, Fishing Bridge, Canyon, Mammoth,
+   Norris, Madison, West Thumb. Used at z14 for highest map detail. */
+const YELL_CORE = { west: -110.9, south: 44.35, east: -110.0, north: 45.05 };
 
 /* Non-Yellowstone key stops — pad ±0.12° (~9 km) around each centre */
 const PAD = 0.12;
@@ -26,8 +34,6 @@ const STOP_BOXES = [
   { id: 'thermopolis',   box: stopBox(-108.21, 43.65) }, // Hot Springs stop
   { id: 'cody',          box: stopBox(-109.07, 44.52) }, // Cody KOA + rodeo + museum
   { id: 'fort-collins',  box: stopBox(-105.08, 40.58) }, // Fort Collins KOA night 6
-  // Yellowstone stops (Fishing Bridge, Old Faithful, Canyon) are covered by
-  // the full YELL_BBOX Tier 3 below — no separate stop boxes needed.
 ];
 
 /* ── Source URL factories ────────────────────────────────────────────────── */
@@ -40,25 +46,28 @@ const SRC_URL = {
 
 /* ── Region definitions ──────────────────────────────────────────────────── */
 const REGIONS = [
-  /* Tier 1 — full corridor, driving-level detail */
-  { id: 'full-topo',   bbox: FULL_BBOX, layers: ['topo'],           minZ: 4, maxZ: 12 },
-  { id: 'full-sat',    bbox: FULL_BBOX, layers: ['sat'],            minZ: 4, maxZ: 11 },
-  { id: 'full-labels', bbox: FULL_BBOX, layers: ['places', 'roads'],minZ: 4, maxZ: 12 },
+  /* Tier 1 — full corridor */
+  { id: 'full-topo',   bbox: FULL_BBOX, layers: ['topo'],           minZ: 4, maxZ: 11 },
+  { id: 'full-sat',    bbox: FULL_BBOX, layers: ['sat'],            minZ: 4, maxZ: 9  },
+  { id: 'full-labels', bbox: FULL_BBOX, layers: ['places', 'roads'],minZ: 4, maxZ: 11 },
 
-  /* Tier 2 — non-Yellowstone stop boxes, campsite-level topo (z13–z15) */
+  /* Tier 2 — non-Yellowstone stop boxes */
   ...STOP_BOXES.map(s => ({
-    id: `stop-${s.id}`, bbox: s.box, layers: ['topo', 'places', 'roads'], minZ: 13, maxZ: 15,
+    id: `stop-${s.id}`, bbox: s.box, layers: ['topo', 'places', 'roads'], minZ: 12, maxZ: 13,
   })),
 
-  /* Tier 3 — Yellowstone: full park at highest map detail (topo only) */
-  { id: 'yell-topo',   bbox: YELL_BBOX, layers: ['topo'],           minZ: 13, maxZ: 16 },
-  { id: 'yell-labels', bbox: YELL_BBOX, layers: ['places', 'roads'],minZ: 13, maxZ: 15 },
+  /* Tier 3 — Yellowstone full park, navigation zoom */
+  { id: 'yell-topo',   bbox: YELL_BBOX, layers: ['topo'],           minZ: 12, maxZ: 13 },
+  { id: 'yell-labels', bbox: YELL_BBOX, layers: ['places', 'roads'],minZ: 12, maxZ: 13 },
+
+  /* Tier 4 — Yellowstone Grand Loop core, highest map detail */
+  { id: 'yell-core',   bbox: YELL_CORE, layers: ['topo'],           minZ: 14, maxZ: 14 },
 ];
 
 /* ── Cache constants ─────────────────────────────────────────────────────── */
-const SAT_CACHE   = 'rv-trip-satellite-v6';
-const DONE_KEY    = 'rv-tiles-precached-v6';
-const CONCURRENCY = 8;  /* conservative — avoids Esri rate limits on large batches */
+const SAT_CACHE   = 'rv-trip-satellite-v7';
+const DONE_KEY    = 'rv-tiles-precached-v7';
+const CONCURRENCY = 8;
 
 /* ── Public API ──────────────────────────────────────────────────────────── */
 
@@ -111,7 +120,7 @@ export async function preCacheMapTiles(onProgress) {
     onProgress?.(Math.round(done / total * 100), done, total,
       batch[0]?.regionId ?? '');
 
-    await new Promise(r => setTimeout(r, 0)); /* yield to keep UI responsive */
+    await new Promise(r => setTimeout(r, 0));
   }
 
   const stats = { ok, skipped, failed, quotaHit };
